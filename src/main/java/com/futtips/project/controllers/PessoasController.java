@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.futtips.project.entities.PessoasEntity;
 import com.futtips.project.services.PessoasService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,13 +39,23 @@ public class PessoasController {
     }
 
     @PostMapping
-    public PessoasEntity criar(@RequestBody PessoasEntity pessoasEntity) {
+    public PessoasEntity criar(@Valid @RequestBody PessoasEntity pessoasEntity) {
         return pessoasService.criar(pessoasEntity);
     }
     
     @PutMapping("/{id}")
     public PessoasEntity editar(@PathVariable int id,@RequestBody PessoasEntity pessoasEntity){
         return pessoasService.editar(id, pessoasEntity);
+    }
+
+    @PutMapping("/{id}/ativar")
+    public PessoasEntity ativar(@PathVariable Integer id){
+        return pessoasService.ativar(id);
+    }
+
+    @PutMapping("/{id}/desativar")
+    public PessoasEntity desativar(@PathVariable Integer id){
+        return pessoasService.desativar(id);
     }
 
     @DeleteMapping("/{id}")

@@ -11,4 +11,6 @@ public interface ItensPedidosRepository extends JpaRepository<ItensPedidosEntity
     List<ItensPedidosEntity> findByPedidoCodigo(Integer pedidoCodigo);
 
     List<ItensPedidosEntity> findByCamisaIdCamisa(Integer idCamisa);
+
+    void deleteByPedidoCodigo(Integer pedidoCodigo);
 }

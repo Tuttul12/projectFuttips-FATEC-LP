@@ -2,6 +2,8 @@ package com.futtips.project.entities;
 
 import java.io.Serializable;
 
+import org.antlr.v4.runtime.misc.NotNull;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +16,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.validator.constraints.br.CPF;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 
 @Entity
 @NoArgsConstructor
@@ -32,6 +41,7 @@ public class PessoasEntity implements Serializable{
     private String nome;
 
     @Column (length = 14, nullable = false, unique = true)
+    @CPF
     private String cpf;
 
     @Column (length = 254, nullable = false, unique = true)
@@ -39,5 +49,8 @@ public class PessoasEntity implements Serializable{
 
     @Column (length = 255, nullable = false)
     private String senha;
+
+    @Column(nullable = false)
+    private Boolean ativo = true;
 
 }

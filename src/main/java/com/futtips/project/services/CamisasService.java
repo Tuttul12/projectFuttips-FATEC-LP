@@ -36,6 +36,7 @@ public class CamisasService {
     }
 
     public CamisasEntity criar(CamisasEntity camisa) {
+        validarQuantidade(camisa.getQuantidade());
         return camisasRepository.save(camisa);
     }
 
@@ -44,11 +45,18 @@ public class CamisasService {
             .orElseThrow(() -> new RuntimeException("Camisa não encontrada!"));
         existente.setDescricao(camisa.getDescricao());
         existente.setTamanho(camisa.getTamanho());
+        validarQuantidade(camisa.getQuantidade());
         existente.setQuantidade(camisa.getQuantidade());
         return camisasRepository.save(existente);
     }
 
     public void excluir(Integer id) {
         camisasRepository.deleteById(id);
+    }
+
+    private void validarQuantidade(Integer quantidade) {
+        if (quantidade == null || quantidade < 0) {
+            throw new RuntimeException("A quantidade em estoque precisa ser informada e não pode ser negativa!");
+        }
     }
 }

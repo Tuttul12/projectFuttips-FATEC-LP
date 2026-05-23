@@ -1,17 +1,25 @@
 package com.futtips.project.services;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.futtips.project.entities.CamisasEntity;
+import com.futtips.project.entities.ClientesEntity;
+import com.futtips.project.entities.ItensPedidosEntity;
 import com.futtips.project.entities.PedidosEntity;
 import com.futtips.project.entities.dto.CriarPedidoDTO;
+import com.futtips.project.repositories.CamisasRepository;
+import com.futtips.project.repositories.ClientesRepository;
+import com.futtips.project.repositories.ItensPedidosRepository;
 import com.futtips.project.repositories.PedidosRepository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -20,8 +28,14 @@ public class PedidosService {
     @Autowired
     private PedidosRepository pedidosRepository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Autowired
+    private ClientesRepository clientesRepository;
+
+    @Autowired
+    private CamisasRepository camisasRepository;
+
+    @Autowired
+    private ItensPedidosRepository itensPedidosRepository;
 
     public List<PedidosEntity> buscarTodos() {
         return pedidosRepository.findAll();
@@ -37,40 +51,102 @@ public class PedidosService {
 
     @Transactional
     public PedidosEntity criar(CriarPedidoDTO dto) {
+        validarDtoPedido(dto);
 
-        // Converte a lista de itens para JSON string
-        StringBuilder itensJson = new StringBuilder("[");
-        for (int i = 0; i < dto.getItens().size(); i++) {
-            CriarPedidoDTO.ItemPedidoDTO item = dto.getItens().get(i);
-            itensJson.append("{\"idCamisa\":")
-                    .append(item.getIdCamisa())
-                    .append(",\"qtd\":")
-                    .append(item.getQtd())
-                    .append("}");
-            if (i < dto.getItens().size() - 1) itensJson.append(",");
+        ClientesEntity cliente = clientesRepository.findById(dto.getIdCliente())
+            .orElseThrow(() -> new RuntimeException("Cliente não encontrado!"));
+
+        if (cliente.getAtivo() != null && !cliente.getAtivo()) {
+            throw new RuntimeException("Não é possível criar pedido para cliente desativado!");
         }
-        itensJson.append("]");
 
-        // Chama a procedure
-        entityManager.createNativeQuery(
-            "EXEC sp_criar_pedido " +
-            "@id_cliente = :idCliente, " +
-            "@valor = :valor, " +
-            "@itens = :itens")
-            .setParameter("idCliente", dto.getIdCliente())
-            .setParameter("valor",     dto.getValor())
-            .setParameter("itens",     itensJson.toString())
-            .executeUpdate();
+        Map<Integer, Integer> quantidadesSolicitadas = agruparQuantidades(dto.getItens());
+        Map<Integer, CamisasEntity> camisas = buscarEValidarEstoque(quantidadesSolicitadas);
 
+        PedidosEntity pedido = new PedidosEntity();
+        pedido.setClientesEntity(cliente);
+        pedido.setValor(dto.getValor());
+        pedido.setDataPedido(new Date());
+        pedido.setProtocolo(gerarProtocolo());
+        PedidosEntity pedidoSalvo = pedidosRepository.save(pedido);
 
-        return pedidosRepository.findByClientesEntityId(dto.getIdCliente())
-            .stream()
-            .reduce((first, second) -> second)  // pega o último da lista
-            .orElseThrow(() -> new RuntimeException("Erro ao buscar pedido após cadastro"));
+        for (Map.Entry<Integer, Integer> entrada : quantidadesSolicitadas.entrySet()) {
+            CamisasEntity camisa = camisas.get(entrada.getKey());
+            Integer quantidadeVendida = entrada.getValue();
+
+            ItensPedidosEntity item = new ItensPedidosEntity();
+            item.setPedido(pedidoSalvo);
+            item.setCamisa(camisa);
+            item.setQtd(quantidadeVendida);
+            itensPedidosRepository.save(item);
+
+            camisa.setQuantidade(camisa.getQuantidade() - quantidadeVendida);
+            camisasRepository.save(camisa);
+        }
+
+        return pedidoSalvo;
     }
 
     public void excluir(Integer id) {
         pedidosRepository.deleteById(id);
     }
 
+    private void validarDtoPedido(CriarPedidoDTO dto) {
+        if (dto == null) {
+            throw new RuntimeException("Dados do pedido não informados!");
+        }
+        if (dto.getIdCliente() == null) {
+            throw new RuntimeException("Cliente do pedido não informado!");
+        }
+        if (dto.getValor() == null) {
+            throw new RuntimeException("Valor do pedido não informado!");
+        }
+        if (dto.getItens() == null || dto.getItens().isEmpty()) {
+            throw new RuntimeException("O pedido precisa ter pelo menos um item!");
+        }
+    }
+
+    private Map<Integer, Integer> agruparQuantidades(List<CriarPedidoDTO.ItemPedidoDTO> itens) {
+        Map<Integer, Integer> quantidades = new HashMap<>();
+
+        for (CriarPedidoDTO.ItemPedidoDTO item : itens) {
+            if (item.getIdCamisa() == null) {
+                throw new RuntimeException("Camisa do item não informada!");
+            }
+            if (item.getQtd() == null || item.getQtd() <= 0) {
+                throw new RuntimeException("A quantidade do item deve ser maior que zero!");
+            }
+            quantidades.merge(item.getIdCamisa(), item.getQtd(), Integer::sum);
+        }
+
+        return quantidades;
+    }
+
+    private Map<Integer, CamisasEntity> buscarEValidarEstoque(Map<Integer, Integer> quantidadesSolicitadas) {
+        Map<Integer, CamisasEntity> camisas = new HashMap<>();
+
+        for (Map.Entry<Integer, Integer> entrada : quantidadesSolicitadas.entrySet()) {
+            CamisasEntity camisa = camisasRepository.findById(entrada.getKey())
+                .orElseThrow(() -> new RuntimeException("Camisa não encontrada: id " + entrada.getKey()));
+
+            Integer estoqueAtual = camisa.getQuantidade() == null ? 0 : camisa.getQuantidade();
+            Integer quantidadeSolicitada = entrada.getValue();
+
+            if (quantidadeSolicitada > estoqueAtual) {
+                throw new RuntimeException(
+                    "Estoque insuficiente para a camisa " + camisa.getIdCamisa() +
+                    ". Estoque atual: " + estoqueAtual +
+                    ", quantidade solicitada: " + quantidadeSolicitada
+                );
+            }
+
+            camisas.put(camisa.getIdCamisa(), camisa);
+        }
+
+        return camisas;
+    }
+
+    private String gerarProtocolo() {
+        return "PED-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase();
+    }
 }
