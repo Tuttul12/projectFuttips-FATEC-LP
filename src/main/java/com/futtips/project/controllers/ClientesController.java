@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 import com.futtips.project.entities.ClientesEntity;
+import com.futtips.project.entities.dto.CriarClienteDTO;
+import com.futtips.project.entities.dto.FuncionarioParaClienteDTO;
 import com.futtips.project.services.ClientesService;
 
 @RestController
@@ -35,8 +37,8 @@ public class ClientesController {
     }
 
     @PostMapping
-    public ClientesEntity criar(@RequestBody ClientesEntity clientesEntity) {
-        return clientesService.criar(clientesEntity);
+    public ClientesEntity criar(@RequestBody CriarClienteDTO dto) {
+        return clientesService.criar(dto);
     }
     
     @PutMapping("/{id}")
@@ -47,5 +49,10 @@ public class ClientesController {
     @DeleteMapping("/{id}")
     public ClientesEntity excluir(@PathVariable Integer id){
         return clientesService.exluir(id);
+    }
+
+    @PostMapping("/converter/funcionario-para-cliente")
+    public ClientesEntity funcionarioParaCliente(@RequestBody FuncionarioParaClienteDTO dto) {
+        return clientesService.funcionarioParaCliente(dto);
     }
 }

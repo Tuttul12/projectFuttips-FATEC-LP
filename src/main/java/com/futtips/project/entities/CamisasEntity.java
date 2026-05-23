@@ -43,15 +43,15 @@ public class CamisasEntity implements Serializable {
     // FK → funcionarios (quem registrou)
     @ManyToOne
     @JoinColumn(name = "id_funcionario", nullable = false)
-    private FuncionariosEntity funcionario;
+    private FuncionariosEntity funcionariosEntity;
 
     // FK → tipo_camisas
     @ManyToOne
     @JoinColumn(name = "tipo_camisa", nullable = false)
-    private TipoCamisasEntity tipo;
+    private TipoCamisasEntity tipoCamisasEntity;
 
     // Relacionamento com itens de pedido
     @JsonIgnore
     @OneToMany(mappedBy = "camisa")
-    private List<ItensPedidosEntity> itensPedidos;
+    private List<ItensPedidosEntity> itensPedidosEntity;
 }

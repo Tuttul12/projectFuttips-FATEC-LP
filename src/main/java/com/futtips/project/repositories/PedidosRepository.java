@@ -7,5 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.futtips.project.entities.PedidosEntity;
 
 public interface PedidosRepository extends JpaRepository<PedidosEntity, Integer> {
-    List<PedidosEntity> buscaPorClienteId(Integer clienteId);
+    List<PedidosEntity> findByClientesEntityId(Integer clienteId);
+
 }

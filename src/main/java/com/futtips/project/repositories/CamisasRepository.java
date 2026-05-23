@@ -6,13 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.futtips.project.entities.CamisasEntity;
 
-public interface CamisasRepository extends JpaRepository <CamisasRepository, Integer> {
+public interface CamisasRepository extends JpaRepository <CamisasEntity, Integer> {
 
-    List<CamisasEntity> bucasPorTipoIdTipo(Integer idTipo);
+    List<CamisasEntity> findByTipoCamisasEntityIdTipo(Integer idTipo);
+
+    // navega: funcionariosEntity → id (herdado de PessoasEntity)
+    List<CamisasEntity> findByFuncionariosEntityId(Integer idFuncionario);
 
     
-    List<CamisasEntity> bucasPorFuncionarioIdPessoa(Integer idFuncionario);
-
-    
-    List<CamisasEntity> bucasPorTamanho(String tamanho);
+    List<CamisasEntity> findByTamanho(String tamanho);
 }

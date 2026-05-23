@@ -8,13 +8,22 @@ import org.springframework.stereotype.Service;
 
 
 import com.futtips.project.entities.FuncionariosEntity;
+import com.futtips.project.entities.dto.ClienteParaFuncionarioDTO;
+import com.futtips.project.entities.dto.CriarFuncionarioDTO;
 import com.futtips.project.repositories.FuncionariosRepository;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 
 @Service
 public class FuncionariosService {
 
     @Autowired
     private FuncionariosRepository funcionariosRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public List<FuncionariosEntity> buscarTodos() {
         return funcionariosRepository.findAll();
@@ -24,8 +33,29 @@ public class FuncionariosService {
         return funcionariosRepository.findById(id);
     }
 
-    public FuncionariosEntity criar(FuncionariosEntity funcionariosEntity) {
-        return funcionariosRepository.save(funcionariosEntity);
+    @Transactional
+    public FuncionariosEntity criar(CriarFuncionarioDTO dto) {
+
+        // Chama a procedure
+        entityManager.createNativeQuery(
+            "EXEC sp_criar_pessoa_funcionario " +
+            "@nome = :nome, " +
+            "@cpf = :cpf, " +
+            "@email = :email, " +
+            "@senha = :senha, " +
+            "@salario = :salario, " +
+            "@codigo_cargo = :codigoCargo")
+            .setParameter("nome",        dto.getNome())
+            .setParameter("cpf",         dto.getCpf())
+            .setParameter("email",       dto.getEmail())
+            .setParameter("senha",       dto.getSenha())
+            .setParameter("salario",     dto.getSalario())
+            .setParameter("codigoCargo", dto.getCodigoCargo())
+            .executeUpdate();
+
+        // Busca o funcionario recém criado pelo CPF
+        return funcionariosRepository.findByCpf(dto.getCpf())
+            .orElseThrow(() -> new RuntimeException("Erro ao buscar funcionário após cadastro"));
     }
 
     public FuncionariosEntity editar(int id, FuncionariosEntity funcionariosEntity) {
@@ -45,6 +75,23 @@ public class FuncionariosService {
        FuncionariosEntity funcionarios = funcionariosRepository.findById(id).orElseThrow(() -> new RuntimeException("Funcionario não encontrado!"));
        funcionariosRepository.deleteById(id);
        return funcionarios;
+    }
+
+    @Transactional
+    public FuncionariosEntity clienteParaFuncionario(ClienteParaFuncionarioDTO dto) {
+
+        entityManager.createNativeQuery(
+            "EXEC sp_cliente_para_funcionario " +
+            "@id_pessoa = :idPessoa, " +
+            "@salario = :salario, " +
+            "@codigo_cargo = :codigoCargo")
+            .setParameter("idPessoa",    dto.getIdPessoa())
+            .setParameter("salario",     dto.getSalario())
+            .setParameter("codigoCargo", dto.getCodigoCargo())
+            .executeUpdate();
+
+        return funcionariosRepository.findById(dto.getIdPessoa())
+            .orElseThrow(() -> new RuntimeException("Erro ao buscar funcionário após conversão"));
     }
 
 }

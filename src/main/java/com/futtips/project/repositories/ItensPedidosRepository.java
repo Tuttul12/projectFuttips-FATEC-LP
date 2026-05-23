@@ -8,8 +8,7 @@ import com.futtips.project.entities.ItensPedidosEntity;
 
 public interface ItensPedidosRepository extends JpaRepository<ItensPedidosEntity, Integer> {
 
-    List<ItensPedidosEntity> buscaPorPedidoCodigo(Integer pedidoCodigo);
+    List<ItensPedidosEntity> findByPedidoCodigo(Integer pedidoCodigo);
 
-    
-    List<ItensPedidosEntity> buscaPorCamisaIdCamisa(Integer idCamisa);
+    List<ItensPedidosEntity> findByCamisaIdCamisa(Integer idCamisa);
 }

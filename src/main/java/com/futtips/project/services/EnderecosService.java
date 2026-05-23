@@ -25,7 +25,7 @@ public class EnderecosService {
     }
 
     public List<EnderecosEntity> buscarPorPessoa(Integer pessoaId) {
-        return enderecosRepository.findByIdPessoaId(pessoaId);
+        return enderecosRepository.findByIdPessoasEntityId(pessoaId);
     }
 
     public EnderecosEntity criar(EnderecosEntity enderecosEntity) {
@@ -33,7 +33,7 @@ public class EnderecosService {
     }
 
     public EnderecosEntity editar(Integer idEndereco, Integer pessoaId, EnderecosEntity enderecosEntity) {
-        Optional<EnderecosEntity> enderecos = enderecosRepository.findByIdIdEnderecosAndIdPessoaId(idEndereco, pessoaId);
+        Optional<EnderecosEntity> enderecos = enderecosRepository.findByIdIdEnderecoAndIdPessoasEntityId(idEndereco, pessoaId);
         if(enderecos.isPresent()){
             EnderecosEntity enderecosParaAtualizar = enderecos.get();
             enderecosParaAtualizar.setRua(enderecosEntity.getRua());
@@ -50,6 +50,6 @@ public class EnderecosService {
     }
 
     public void excluir(Integer idEndereco, Integer pessoaId) {
-       enderecosRepository.deleteByIdIdEnderecosAndIdPessoaId(idEndereco, pessoaId);
+       enderecosRepository.deleteByIdIdEnderecoAndIdPessoasEntityId(idEndereco, pessoaId);
     }
 }

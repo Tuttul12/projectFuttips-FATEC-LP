@@ -10,8 +10,10 @@ import com.futtips.project.entities.pk.EnderecoPK;
 
 public interface EnderecosRepository extends JpaRepository<EnderecosEntity, EnderecoPK> {
 
-    List<EnderecosEntity> findByIdPessoaId(Integer pessoaId);
+    List<EnderecosEntity> findByIdPessoasEntityId(Integer pessoaId);
 
-    Optional<EnderecosEntity> findByIdIdEnderecosAndIdPessoaId(Integer idEndereco, Integer pessoaId);
-    void deleteByIdIdEnderecosAndIdPessoaId(Integer idEndereco, Integer pessoaId);
+    
+    Optional<EnderecosEntity> findByIdIdEnderecoAndIdPessoasEntityId(Integer idEndereco, Integer pessoaId);
+
+    void deleteByIdIdEnderecoAndIdPessoasEntityId(Integer idEndereco, Integer pessoaId);
 }

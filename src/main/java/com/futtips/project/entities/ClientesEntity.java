@@ -1,6 +1,6 @@
 package com.futtips.project.entities;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -32,7 +32,7 @@ public class ClientesEntity extends PessoasEntity {
     private String telefone;
 
     @Column (nullable = false, name = "data_cadastro")
-    private Instant dataCadastro;
+    private LocalDateTime dataCadastro;
 
     @JsonIgnore
     @OneToMany

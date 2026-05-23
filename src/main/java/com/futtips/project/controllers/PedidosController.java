@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.futtips.project.entities.PedidosEntity;
+import com.futtips.project.entities.dto.CriarPedidoDTO;
 import com.futtips.project.services.PedidosService;
 
 @RestController
@@ -38,12 +39,13 @@ public class PedidosController {
     }
 
     @PostMapping
-    public PedidosEntity criar(@RequestBody PedidosEntity pedido) {
-        return pedidosService.criar(pedido);
+    public PedidosEntity criar(@RequestBody CriarPedidoDTO dto) {
+        return pedidosService.criar(dto);
     }
 
     @DeleteMapping("/{id}")
     public void excluir(@PathVariable Integer id) {
         pedidosService.excluir(id);
     }
+
 }

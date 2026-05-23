@@ -24,15 +24,15 @@ public class CamisasService {
     }
 
     public List<CamisasEntity> buscarPorTipo(Integer idTipo) {
-        return camisasRepository.buscaPorTipoIdTipo(idTipo);
+        return camisasRepository.findByTipoCamisasEntityIdTipo(idTipo);
     }
 
     public List<CamisasEntity> buscarPorFuncionario(Integer idFuncionario) {
-        return camisasRepository.buscaPorFuncionarioIdPessoa(idFuncionario);
+        return camisasRepository.findByFuncionariosEntityId(idFuncionario); 
     }
 
     public List<CamisasEntity> buscarPorTamanho(String tamanho) {
-        return camisasRepository.buscaPorTamanho(tamanho);
+        return camisasRepository.findByTamanho(tamanho);
     }
 
     public CamisasEntity criar(CamisasEntity camisa) {
@@ -45,8 +45,6 @@ public class CamisasService {
         existente.setDescricao(camisa.getDescricao());
         existente.setTamanho(camisa.getTamanho());
         existente.setQuantidade(camisa.getQuantidade());
-        existente.setFuncionario(camisa.getFuncionario());
-        existente.setTipo(camisa.getTipo());
         return camisasRepository.save(existente);
     }
 

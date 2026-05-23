@@ -32,5 +32,27 @@ public class CargoService {
         return funcionariosRepository.findByCargoCodigo(codigoCargo);
     }
 
+    public CargoEntity criar(CargoEntity cargoEntity) {
+        return cargoRepository.save(cargoEntity);
+    }
+
+    public CargoEntity editar(int id, CargoEntity cargoEntity) {
+        Optional<CargoEntity> cargo = cargoRepository.findById(id);
+        if(cargo.isPresent()){
+            CargoEntity cargoParaAtualizar = cargo.get();
+            cargoParaAtualizar.setPermissao(cargoEntity.getPermissao());
+            return cargoRepository.save(cargoParaAtualizar);
+        } else{
+            return null;
+        }      
+    
+    }
+
+    public CargoEntity exluir(Integer id) {
+       CargoEntity cargo = cargoRepository.findById(id).orElseThrow(() -> new RuntimeException("Cargo não encontrado!"));
+       cargoRepository.deleteById(id);
+       return cargo;
+    }
+
 
 }

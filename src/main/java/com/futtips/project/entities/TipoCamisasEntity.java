@@ -36,6 +36,6 @@ public class TipoCamisasEntity implements Serializable {
     private String fabricante;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "tipo")
-    private List<CamisasEntity> camisas;
+    @OneToMany(mappedBy = "tipoCamisasEntity")
+    private List<CamisasEntity> camisasEntity;
 }

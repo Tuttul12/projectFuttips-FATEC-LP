@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.futtips.project.entities.TipoCamisasEntity;
 
-public interface TipoCamisasRepository extends JpaRepository<TipoCamisasRepository, Integer> {
+public interface TipoCamisasRepository extends JpaRepository<TipoCamisasEntity, Integer> {
 
-    List<TipoCamisasEntity> buscaPorFabricante(String fabricante);
+    List<TipoCamisasEntity> findByFabricante(String fabricante);
 
-    List<TipoCamisasEntity> buscaPorModelo(String modelo);
+    List<TipoCamisasEntity> findByModelo(String modelo);
 }

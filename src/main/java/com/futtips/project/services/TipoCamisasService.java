@@ -24,11 +24,11 @@ public class TipoCamisasService {
     }
 
     public List<TipoCamisasEntity> buscarPorFabricante(String fabricante) {
-        return tipoCamisasRepository.buscaPorFabricante(fabricante);
+        return tipoCamisasRepository.findByFabricante(fabricante);
     }
 
     public List<TipoCamisasEntity> buscarPorModelo(String modelo) {
-        return tipoCamisasRepository.buscaPorModelo(modelo);
+        return tipoCamisasRepository.findByModelo(modelo);
     }
 
     public TipoCamisasEntity criar(TipoCamisasEntity tipo) {
