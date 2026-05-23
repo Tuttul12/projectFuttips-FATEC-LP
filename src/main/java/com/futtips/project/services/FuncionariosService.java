@@ -24,4 +24,27 @@ public class FuncionariosService {
         return funcionariosRepository.findById(id);
     }
 
+    public FuncionariosEntity criar(FuncionariosEntity funcionariosEntity) {
+        return funcionariosRepository.save(funcionariosEntity);
+    }
+
+    public FuncionariosEntity editar(int id, FuncionariosEntity funcionariosEntity) {
+        Optional<FuncionariosEntity> funcionarios = funcionariosRepository.findById(id);
+        if(funcionarios.isPresent()){
+            FuncionariosEntity funcionariosParaAtualizar = funcionarios.get();
+            funcionariosParaAtualizar.setSalario(funcionariosEntity.getSalario());
+            funcionariosParaAtualizar.setCargo(funcionariosEntity.getCargo());
+            return funcionariosRepository.save(funcionariosParaAtualizar);
+        } else{
+            return null;
+        }      
+    
+    }
+
+    public FuncionariosEntity exluir(Integer id) {
+       FuncionariosEntity funcionarios = funcionariosRepository.findById(id).orElseThrow(() -> new RuntimeException("Funcionario não encontrado!"));
+       funcionariosRepository.deleteById(id);
+       return funcionarios;
+    }
+
 }

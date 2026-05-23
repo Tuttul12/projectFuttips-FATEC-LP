@@ -23,5 +23,29 @@ public class PessoasService {
         return pessoasRepository.findById(id);
     }
 
+    public PessoasEntity criar(PessoasEntity pessoasEntity) {
+        return pessoasRepository.save(pessoasEntity);
+    }
+
+    public PessoasEntity editar(int id, PessoasEntity pessoasEntity) {
+        Optional<PessoasEntity> pessoas = pessoasRepository.findById(id);
+        if(pessoas.isPresent()){
+            PessoasEntity pessoasParaAtualizar = pessoas.get();
+            pessoasParaAtualizar.setNome(pessoasEntity.getNome());
+            pessoasParaAtualizar.setCpf(pessoasEntity.getCpf());
+            pessoasParaAtualizar.setEmail(pessoasEntity.getEmail());
+            pessoasParaAtualizar.setSenha(pessoasEntity.getSenha());
+            return pessoasRepository.save(pessoasParaAtualizar);
+        } else{
+            return null;
+        }      
+    
+    }
+
+    public PessoasEntity exluir(Integer id) {
+       PessoasEntity pessoas = pessoasRepository.findById(id).orElseThrow(() -> new RuntimeException("Pessoa não encontrado!"));
+       pessoasRepository.deleteById(id);
+       return pessoas;
+    }
 
 }

@@ -10,8 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.futtips.project.entities.PessoasEntity;
 import com.futtips.project.services.PessoasService;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 
@@ -31,5 +35,20 @@ public class PessoasController {
     public Optional<PessoasEntity> buscarPessoas(@PathVariable Integer id){
         return pessoasService.buscarPessoas(id);
     }
+
+    @PostMapping
+    public PessoasEntity criar(@RequestBody PessoasEntity pessoasEntity) {
+        return pessoasService.criar(pessoasEntity);
+    }
     
+    @PutMapping("/{id}")
+    public PessoasEntity editar(@PathVariable int id,@RequestBody PessoasEntity pessoasEntity){
+        return pessoasService.editar(id, pessoasEntity);
+    }
+
+    @DeleteMapping("/{id}")
+    public PessoasEntity excluir(@PathVariable Integer id){
+        return pessoasService.exluir(id);
+    }
+
 }
