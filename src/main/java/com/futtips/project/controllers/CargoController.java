@@ -1,9 +1,10 @@
 package com.futtips.project.controllers;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,10 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.futtips.project.entities.CargoEntity;
 import com.futtips.project.entities.FuncionariosEntity;
+import com.futtips.project.responses.ApiResponse;
 import com.futtips.project.services.CargoService;
 
-
-
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/cargo")
@@ -28,33 +29,38 @@ public class CargoController {
     private CargoService cargoService;
 
     @GetMapping
-    public List<CargoEntity> buscarTodos(){
-        return cargoService.buscarTodos();
+    public ResponseEntity<ApiResponse<List<CargoEntity>>> buscarTodos(){
+        return ResponseEntity.ok(ApiResponse.sucesso("Cargos encontrados com sucesso.", cargoService.buscarTodos()));
     }
 
     @GetMapping("/{id}")
-    public Optional<CargoEntity> buscarCargo(@PathVariable Integer id){
-        return cargoService.buscarCargo(id);
+    public ResponseEntity<ApiResponse<CargoEntity>> buscarCargo(@PathVariable Integer id){
+        return cargoService.buscarCargo(id)
+            .map(cargo -> ResponseEntity.ok(ApiResponse.sucesso("Cargo encontrado com sucesso.", cargo)))
+            .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<CargoEntity>erro("Cargo não encontrado.", null)));
     }
 
     @GetMapping("/{id}/funcionarios")
-    public List<FuncionariosEntity> buscarFuncionariosPorCargo(@PathVariable Integer id) {
-        return cargoService.buscarFuncionariosPorCargo(id);
+    public ResponseEntity<ApiResponse<List<FuncionariosEntity>>> buscarFuncionariosPorCargo(@PathVariable Integer id) {
+        return ResponseEntity.ok(ApiResponse.sucesso("Funcionários encontrados por cargo.", cargoService.buscarFuncionariosPorCargo(id)));
     }
 
     @PostMapping
-    public CargoEntity criar(@RequestBody CargoEntity cargoEntity) {
-        return cargoService.criar(cargoEntity);
+    public ResponseEntity<ApiResponse<CargoEntity>> criar(@Valid @RequestBody CargoEntity cargoEntity) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.sucesso("Cargo cadastrado com sucesso.", cargoService.criar(cargoEntity)));
     }
     
     @PutMapping("/{id}")
-    public CargoEntity editar(@PathVariable int id,@RequestBody CargoEntity cargoEntity){
-        return cargoService.editar(id, cargoEntity);
+    public ResponseEntity<ApiResponse<CargoEntity>> editar(@PathVariable int id, @Valid @RequestBody CargoEntity cargoEntity){
+        CargoEntity atualizado = cargoService.editar(id, cargoEntity);
+        if (atualizado == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<CargoEntity>erro("Cargo não encontrado.", null));
+        }
+        return ResponseEntity.ok(ApiResponse.sucesso("Cargo atualizado com sucesso.", atualizado));
     }
 
     @DeleteMapping("/{id}")
-    public CargoEntity excluir(@PathVariable Integer id){
-        return cargoService.exluir(id);
+    public ResponseEntity<ApiResponse<CargoEntity>> excluir(@PathVariable Integer id){
+        return ResponseEntity.ok(ApiResponse.sucesso("Cargo excluído com sucesso.", cargoService.exluir(id)));
     }
-    
 }

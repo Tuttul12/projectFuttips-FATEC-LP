@@ -1,9 +1,10 @@
 package com.futtips.project.controllers;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,7 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.futtips.project.entities.PedidosEntity;
 import com.futtips.project.entities.dto.CriarPedidoDTO;
+import com.futtips.project.responses.ApiResponse;
 import com.futtips.project.services.PedidosService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/pedidos")
@@ -23,29 +27,30 @@ public class PedidosController {
     private PedidosService pedidosService;
 
     @GetMapping
-    public List<PedidosEntity> buscarTodos() {
-        return pedidosService.buscarTodos();
+    public ResponseEntity<ApiResponse<List<PedidosEntity>>> buscarTodos() {
+        return ResponseEntity.ok(ApiResponse.sucesso("Pedidos encontrados com sucesso.", pedidosService.buscarTodos()));
     }
 
     @GetMapping("/{id}")
-    public Optional<PedidosEntity> buscarPedido(@PathVariable Integer id) {
-        return pedidosService.buscarPedido(id);
+    public ResponseEntity<ApiResponse<PedidosEntity>> buscarPedido(@PathVariable Integer id) {
+        return pedidosService.buscarPedido(id)
+            .map(pedido -> ResponseEntity.ok(ApiResponse.sucesso("Pedido encontrado com sucesso.", pedido)))
+            .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<PedidosEntity>erro("Pedido não encontrado.", null)));
     }
 
-    // GET /pedidos/cliente/3
     @GetMapping("/cliente/{clienteId}")
-    public List<PedidosEntity> buscarPorCliente(@PathVariable Integer clienteId) {
-        return pedidosService.buscarPorCliente(clienteId);
+    public ResponseEntity<ApiResponse<List<PedidosEntity>>> buscarPorCliente(@PathVariable Integer clienteId) {
+        return ResponseEntity.ok(ApiResponse.sucesso("Pedidos encontrados por cliente.", pedidosService.buscarPorCliente(clienteId)));
     }
 
     @PostMapping
-    public PedidosEntity criar(@RequestBody CriarPedidoDTO dto) {
-        return pedidosService.criar(dto);
+    public ResponseEntity<ApiResponse<PedidosEntity>> criar(@Valid @RequestBody CriarPedidoDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.sucesso("Pedido cadastrado com sucesso.", pedidosService.criar(dto)));
     }
 
     @DeleteMapping("/{id}")
-    public void excluir(@PathVariable Integer id) {
+    public ResponseEntity<ApiResponse<Void>> excluir(@PathVariable Integer id) {
         pedidosService.excluir(id);
+        return ResponseEntity.ok(ApiResponse.sucesso("Pedido excluído com sucesso.", null));
     }
-
 }

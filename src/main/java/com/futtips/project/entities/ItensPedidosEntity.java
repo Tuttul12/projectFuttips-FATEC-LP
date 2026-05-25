@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,15 +29,17 @@ public class ItensPedidosEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotNull(message = "A quantidade do item é obrigatória.")
+    @Min(value = 1, message = "A quantidade do item deve ser maior que zero.")
     @Column(nullable = false)
     private Integer qtd;
 
-    // FK para pedidos
+    @NotNull(message = "O pedido do item é obrigatório.")
     @ManyToOne
     @JoinColumn(name = "id_pedido", nullable = false)
     private PedidosEntity pedido;
 
-    // FK para camisas
+    @NotNull(message = "A camisa do item é obrigatória.")
     @ManyToOne
     @JoinColumn(name = "id_camisa", nullable = false)
     private CamisasEntity camisa;
