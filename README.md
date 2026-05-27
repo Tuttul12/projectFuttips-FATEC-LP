@@ -236,16 +236,14 @@ enderecos ── pessoas
 
 ### Executar view de relatorio
 `GET /relatorios`
+---
 
-```
 
 ### Executar Function de gasto de cada cliente
 `GET /clientes/{5}/total-gasto`
-
-```
-
 ---
-
+```
+```
 ## Procedures
 
 | Procedure | Descrição |
@@ -264,6 +262,14 @@ enderecos ── pessoas
 | Procedure | Descrição |
 |---|---|
 | `vw_relatorio_clientes` | Relatório que busca clientes, quantidade de pedidos e valor gasto |
+
+---
+
+## Functions
+
+| Procedure | Descrição |
+|---|---|
+| `fn_total_gasto_cliente` | Faz o calculo total gasto de cada cliente |
 
 ---
 
