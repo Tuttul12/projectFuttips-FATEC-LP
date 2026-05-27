@@ -235,7 +235,7 @@ enderecos ── pessoas
 ```
 
 ### Executar view de relatorio
-`GET /relatorioso`
+`GET /relatorios`
 
 ```
 
@@ -256,6 +256,14 @@ enderecos ── pessoas
 | `sp_funcionario_para_cliente` | Converte funcionário existente em cliente |
 | `sp_criar_pedido` | Cria pedido e insere todos os itens numa transação |
 | `sp_atualizar_itens_pedido` | Remove itens antigos e reinsere os novos numa transação |
+
+---
+
+## Views
+
+| Procedure | Descrição |
+|---|---|
+| `vw_relatorio_clientes` | Relatório que busca clientes, quantidade de pedidos e valor gasto |
 
 ---
 
