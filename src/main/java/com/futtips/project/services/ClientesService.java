@@ -33,26 +33,28 @@ public class ClientesService {
     @Transactional
     public ClientesEntity criar(CriarClienteDTO dto) {
 
-        // Chama a procedure passando todos os parâmetros
         entityManager.createNativeQuery(
             "EXEC sp_criar_pessoa_cliente " +
-            "@nome = :nome, " +
-            "@cpf = :cpf, " +
-            "@email = :email, " +
-            "@senha = :senha, " +
-            "@nascimento = :nascimento, " +
-            "@telefone = :telefone")
+            ":nome, :cpf, :email, :senha, " +
+            ":nascimento, :telefone, " +
+            ":rua, :numero, :bairro, :cidade, :estado, :cep")
             .setParameter("nome",       dto.getNome())
             .setParameter("cpf",        dto.getCpf())
             .setParameter("email",      dto.getEmail())
             .setParameter("senha",      dto.getSenha())
             .setParameter("nascimento", dto.getNascimento())
             .setParameter("telefone",   dto.getTelefone())
+            .setParameter("rua",        dto.getRua())
+            .setParameter("numero",     dto.getNumero())
+            .setParameter("bairro",     dto.getBairro())
+            .setParameter("cidade",     dto.getCidade())
+            .setParameter("estado",     dto.getEstado())
+            .setParameter("cep",        dto.getCep())
             .executeUpdate();
 
-        // Busca o cliente recém criado pelo CPF
+        // Busca o cliente pelo CPF após inserção
         return clientesRepository.findByCpf(dto.getCpf())
-            .orElseThrow(() -> new RuntimeException("Erro ao buscar cliente após cadastro"));
+            .orElseThrow(() -> new RuntimeException("Erro ao buscar cliente após inserção"));
     }
 
     public ClientesEntity editar(int id, ClientesEntity clientesEntity) {
