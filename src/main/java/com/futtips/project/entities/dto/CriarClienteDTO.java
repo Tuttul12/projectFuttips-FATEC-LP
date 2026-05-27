@@ -46,4 +46,22 @@ public class CriarClienteDTO {
     @NotBlank(message = "O telefone é obrigatório.")
     @Pattern(regexp = "^[0-9+()\\-\\s]{10,20}$", message = "Telefone inválido.")
     private String telefone;
+
+    @NotBlank(message = "O Endereço é obrigatório")
+    private String rua;
+
+    @NotBlank(message = "O Numero é obrigatorio")
+    private String numero;
+
+    @NotBlank(message = "O Bairro é obrigatório")
+    private String bairro;
+
+    @NotBlank(message = "A Cidade é obrigatória")
+    private String cidade;
+
+    @NotBlank(message = "O Estado é obrigatório")
+    private String estado;
+
+    @NotBlank(message = "O CEP é obrigatório")
+    private String cep;
 }
