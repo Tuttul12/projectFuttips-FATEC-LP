@@ -159,12 +159,18 @@ enderecos ── pessoas
 `POST /clientes`
 ```json
 {
-    "nome":       "Pedro Henrique",
-    "cpf":        "888.888.888-88",
-    "email":      "pedro@futtips.com",
+    "nome":       "Heitor Galinha",
+    "cpf":        "999.813.132-49",
+    "email":      "galinha@futtips.com",
     "senha":      "senha123",
-    "nascimento": "1995-05-10",
-    "telefone":   "17 98888-8888"
+    "nascimento": "1998-02-12",
+    "telefone":   "17 99999-3332",
+    "rua":        "Rua das macacas",
+    "numero":     "123",
+    "bairro":     "Centro",
+    "cidade":     "São José do Rio Preto",
+    "estado":     "SP",
+    "cep":        "15000-000"
 }
 ```
 
@@ -226,6 +232,16 @@ enderecos ── pessoas
         { "idCamisa": 4, "qtd": 3 }
     ]
 }
+```
+
+### Executar view de relatorio
+`GET /relatorioso`
+
+```
+
+### Executar Function de gasto de cada cliente
+`GET /clientes/{5}/total-gasto`
+
 ```
 
 ---
