@@ -39,7 +39,7 @@ public class PessoasController {
     }
 
     @PostMapping
-    public PessoasEntity criar(@Valid @RequestBody PessoasEntity pessoasEntity) {
+    public PessoasEntity criar(@RequestBody PessoasEntity pessoasEntity) {
         return pessoasService.criar(pessoasEntity);
     }
     

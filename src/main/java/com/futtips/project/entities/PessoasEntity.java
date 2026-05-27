@@ -41,7 +41,6 @@ public class PessoasEntity implements Serializable{
     private String nome;
 
     @Column (length = 14, nullable = false, unique = true)
-    @CPF
     private String cpf;
 
     @Column (length = 254, nullable = false, unique = true)
