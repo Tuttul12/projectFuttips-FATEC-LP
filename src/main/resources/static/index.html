@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Futtips · Gerenciamento</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <span class="logo">⚽</span>
+            <div>
+                <h1>Futtips</h1>
+                <p>Painel de gerenciamento da loja</p>
+            </div>
+        </div>
+        <div class="api-config">
+            <label for="apiUrl">API</label>
+            <input id="apiUrl" type="text" />
+            <span id="apiStatus" class="status">·</span>
+            <span id="auth-info" class="status">·</span>
+            <button class="btn-ghost" data-open="form-login">Login</button>
+            <button class="btn-ghost" id="btn-logout">Sair</button>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <button class="tab active" data-tab="camisas">Camisas</button>
+        <button class="tab" data-tab="tipos">Tipos</button>
+        <button class="tab" data-tab="clientes">Clientes</button>
+        <button class="tab" data-tab="funcionarios">Funcionários</button>
+        <button class="tab" data-tab="cargos">Cargos</button>
+        <button class="tab" data-tab="pedidos">Pedidos</button>
+        <button class="tab" data-tab="pessoas">Pessoas</button>
+        <button class="tab" data-tab="relatorios">Relatórios</button>
+    </nav>
+
+    <main>
+        <!-- LOGIN -->
+        <dialog id="form-login" class="modal">
+            <form method="dialog" data-form="login">
+                <h3>Login</h3>
+                <label>Email<input name="email" type="email" required /></label>
+                <label>Senha<input name="senha" type="password" required /></label>
+                <div class="actions">
+                    <button type="button" data-close>Cancelar</button>
+                    <button type="submit" class="btn-primary">Entrar</button>
+                </div>
+            </form>
+        </dialog>
+
+        <!-- CAMISAS -->
+        <section id="tab-camisas" class="panel active">
+            <div class="panel-head">
+                <h2>Camisas</h2>
+                <button class="btn-primary" data-open="form-camisa">+ Nova camisa</button>
+            </div>
+            <div id="list-camisas" class="cards"></div>
+            <dialog id="form-camisa" class="modal">
+                <form method="dialog" data-form="camisa">
+                    <h3>Nova camisa</h3>
+                    <input type="hidden" name="idCamisa" />
+                    <label>Descrição<input name="descricao" required /></label>
+                    <div class="row">
+                        <label>Tamanho
+                            <select name="tamanho" required>
+                                <option>PP</option>
+                                <option>P</option>
+                                <option>M</option>
+                                <option>G</option>
+                                <option>GG</option>
+                                <option>XG</option>
+                            </select>
+                        </label>
+                        <label>Quantidade<input name="quantidade" type="number" min="0" /></label>
+                    </div>
+                    <div class="row">
+                        <label>Tipo<select name="tipoCamisaId" required></select></label>
+                        <label>Funcionário<select name="funcionarioId" required></select></label>
+                    </div>
+                    <div class="actions">
+                        <button type="button" data-close>Cancelar</button>
+                        <button type="submit" class="btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </dialog>
+        </section>
+
+        <!-- TIPOS -->
+        <section id="tab-tipos" class="panel">
+            <div class="panel-head">
+                <h2>Tipos de Camisa</h2><button class="btn-primary" data-open="form-tipo">+ Novo tipo</button>
+            </div>
+            <div id="list-tipos" class="cards"></div>
+            <dialog id="form-tipo" class="modal">
+                <form method="dialog" data-form="tipo">
+                    <h3>Novo tipo</h3>
+                    <input type="hidden" name="idTipo" />
+                    <label>Modelo<input name="modelo" required /></label>
+                    <label>Fabricante<input name="fabricante" required /></label>
+                    <div class="actions">
+                        <button type="button" data-close>Cancelar</button>
+                        <button type="submit" class="btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </dialog>
+        </section>
+
+        <!-- CLIENTES -->
+        <section id="tab-clientes" class="panel">
+            <div class="panel-head">
+                <h2>Clientes</h2><button class="btn-primary" data-open="form-cliente">+ Novo cliente</button>
+            </div>
+            <div id="list-clientes" class="cards"></div>
+            <dialog id="form-cliente" class="modal">
+                <form method="dialog" data-form="cliente">
+                    <h3>Novo cliente</h3>
+                    <label>Nome<input name="nome" required maxlength="50" /></label>
+                    <div class="row">
+                        <label>CPF<input name="cpf" required placeholder="000.000.000-00" /></label>
+                        <label>Telefone<input name="telefone" required placeholder="(11) 99999-9999" /></label>
+                    </div>
+                    <label>Email<input name="email" type="email" required /></label>
+                    <div class="row">
+                        <label>Senha<input name="senha" type="password" required minlength="6" /></label>
+                        <label>Nascimento<input name="nascimento" type="date" required /></label>
+                    </div>
+                    <h4 style="margin-top:1rem">Endereço</h4>
+                    <div class="row">
+                        <label style="flex:2">Rua<input name="rua" required /></label>
+                        <label>Número<input name="numero" required /></label>
+                    </div>
+                    <div class="row">
+                        <label>Bairro<input name="bairro" required /></label>
+                        <label>CEP<input name="cep" required placeholder="00000-000" /></label>
+                    </div>
+                    <div class="row">
+                        <label style="flex:2">Cidade<input name="cidade" required /></label>
+                        <label>UF<input name="estado" required maxlength="2" placeholder="SP" /></label>
+                    </div>
+                    <div class="actions">
+                        <button type="button" data-close>Cancelar</button>
+                        <button type="submit" class="btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </dialog>
+        </section>
+
+        <!-- FUNCIONÁRIOS -->
+        <section id="tab-funcionarios" class="panel">
+            <div class="panel-head">
+                <h2>Funcionários</h2><button class="btn-primary" data-open="form-funcionario">+ Novo
+                    funcionário</button>
+            </div>
+            <div id="list-funcionarios" class="cards"></div>
+            <dialog id="form-funcionario" class="modal">
+                <form method="dialog" data-form="funcionario">
+                    <h3>Novo funcionário</h3>
+                    <label>Nome<input name="nome" required /></label>
+                    <div class="row">
+                        <label>CPF<input name="cpf" required /></label>
+                        <label>Email<input name="email" type="email" required /></label>
+                    </div>
+                    <div class="row">
+                        <label>Senha<input name="senha" type="password" required minlength="6" /></label>
+                        <label>Salário<input name="salario" type="number" step="0.01" required /></label>
+                    </div>
+                    <label>Cargo<select name="codigoCargo" required></select></label>
+                    <div class="actions">
+                        <button type="button" data-close>Cancelar</button>
+                        <button type="submit" class="btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </dialog>
+        </section>
+
+        <!-- CARGOS -->
+        <section id="tab-cargos" class="panel">
+            <div class="panel-head">
+                <h2>Cargos</h2><button class="btn-primary" data-open="form-cargo">+ Novo cargo</button>
+            </div>
+            <div id="list-cargos" class="cards"></div>
+            <dialog id="form-cargo" class="modal">
+                <form method="dialog" data-form="cargo">
+                    <h3>Novo cargo</h3>
+                    <input type="hidden" name="codigo" />
+                    <label>Permissão<input name="permissao" required /></label>
+                    <div class="actions">
+                        <button type="button" data-close>Cancelar</button>
+                        <button type="submit" class="btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </dialog>
+        </section>
+
+        <!-- PEDIDOS -->
+        <section id="tab-pedidos" class="panel">
+            <div class="panel-head">
+                <h2>Pedidos</h2><button class="btn-primary" data-open="form-pedido">+ Novo pedido</button>
+            </div>
+            <div id="list-pedidos" class="cards"></div>
+            <dialog id="form-pedido" class="modal">
+                <form method="dialog" data-form="pedido">
+                    <h3>Novo pedido</h3>
+                    <label>Cliente<select name="idCliente" required></select></label>
+                    <label>Valor total (opcional — se vazio usa R$ 50/un)<input name="valor" type="number" step="0.01"
+                            min="0.01" /></label>
+                    <div id="itens-pedido" class="itens-list"></div>
+                    <button type="button" id="add-item" class="btn-ghost">+ Adicionar item</button>
+                    <div class="actions">
+                        <button type="button" data-close>Cancelar</button>
+                        <button type="submit" class="btn-primary">Salvar pedido</button>
+                    </div>
+                </form>
+            </dialog>
+        </section>
+
+        <!-- PESSOAS -->
+        <section id="tab-pessoas" class="panel">
+            <div class="panel-head">
+                <h2>Pessoas</h2>
+            </div>
+            <div id="list-pessoas" class="cards"></div>
+        </section>
+
+        <!-- RELATÓRIOS -->
+        <section id="tab-relatorios" class="panel">
+            <div class="panel-head">
+                <h2>Relatório de Clientes</h2>
+            </div>
+            <div id="list-relatorios" class="cards"></div>
+        </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="app.js"></script>
+</body>
+
+</html>
