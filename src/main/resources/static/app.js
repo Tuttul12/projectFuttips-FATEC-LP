@@ -1,4 +1,4 @@
-const DEFAULT_API = "http://localhost:8080";
+const DEFAULT_API = "http://localhost:8081";
 let API = localStorage.getItem("futtips_api") || DEFAULT_API;
 let TOKEN = localStorage.getItem("futtips_token") || "";
 
