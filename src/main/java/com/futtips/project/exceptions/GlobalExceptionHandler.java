@@ -10,6 +10,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.futtips.project.responses.ApiResponse;
 
@@ -56,6 +57,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
             .body(ApiResponse.erro("Erro de integridade no banco de dados.", Map.of("erro", "Verifique se já existe registro com dados únicos, como CPF ou e-mail, ou se as chaves relacionadas existem.")));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> tratarRecursoEstaticoNaoEncontrado(NoResourceFoundException ex) {
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(ApiResponse.erro("Recurso não encontrado.", Map.of("erro", ex.getResourcePath())));
     }
 
     @ExceptionHandler(RuntimeException.class)

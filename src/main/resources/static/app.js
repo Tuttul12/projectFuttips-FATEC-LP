@@ -25,7 +25,15 @@ async function api(path, opts = {}) {
         throw new Error(msg);
     }
     // Desembrulha ApiResponse { status, message, data }
-    if (body && typeof body === "object" && "data" in body && "message" in body) return body.data;
+    if (
+        body &&
+        typeof body === "object" &&
+        "dados" in body &&
+        "mensagem" in body
+    ) {
+        return body.dados;
+    }
+
     return body;
 }
 const get = (p) => api(p);

@@ -353,7 +353,7 @@ git clone https://github.com/seu-usuario/futtips.git
 ./mvnw spring-boot:run
 ```
 
-6. Acesse a API em `http://localhost:8080`
+6. Acesse a API em `http://localhost:8081`
 
 ---
 
