@@ -24,7 +24,7 @@ body {
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -406,3 +406,172 @@ main {
         padding: 20px 16px;
     }
 }
+
+/* Tela de Login Premium */
+.login-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    background: radial-gradient(circle at 10% 20%, rgba(0, 200, 150, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(240, 168, 48, 0.05) 0%, transparent 45%),
+                #0f1419;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.login-card {
+    background: rgba(26, 32, 40, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 40px 32px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    text-align: center;
+}
+
+.login-header {
+    margin-bottom: 28px;
+}
+
+.login-logo {
+    font-size: 36px;
+    background: linear-gradient(135deg, var(--primary), #00e6ad);
+    width: 64px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 24px rgba(0, 200, 150, 0.25);
+}
+
+.login-header h2 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+}
+
+.login-header p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: left;
+}
+
+.login-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.login-form input {
+    background: rgba(35, 43, 53, 0.5);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(35, 43, 53, 0.8);
+    box-shadow: 0 0 0 3px rgba(0, 200, 150, 0.15);
+}
+
+.btn-login {
+    width: 100%;
+    height: 44px;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.btn-login:active {
+    transform: scale(0.98);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Card de Cadastro e Formulário Interno */
+.form-row {
+    width: 100%;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+
+.form-section-title {
+    margin: 15px 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+}
+
+.auth-toggle {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.auth-toggle a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.15s ease;
+}
+
+.auth-toggle a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+

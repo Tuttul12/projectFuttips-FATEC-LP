@@ -6,54 +6,145 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Futtips · Gerenciamento</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-    <header class="topbar">
-        <div class="brand">
-            <span class="logo">⚽</span>
-            <div>
-                <h1>Futtips</h1>
-                <p>Painel de gerenciamento da loja</p>
+    <!-- Container de Autenticação Dedicado -->
+    <div id="login-container" class="login-screen">
+        <!-- Card de Login -->
+        <div id="login-card" class="login-card animate-fade-in">
+            <div class="login-header">
+                <span class="login-logo">⚽</span>
+                <h2>Futtips</h2>
+                <p>Gerenciador de Estoque e Loja</p>
             </div>
-        </div>
-        <div class="api-config">
-            <label for="apiUrl">API</label>
-            <input id="apiUrl" type="text" />
-            <span id="apiStatus" class="status">·</span>
-            <span id="auth-info" class="status">·</span>
-            <button class="btn-ghost" data-open="form-login">Login</button>
-            <button class="btn-ghost" id="btn-logout">Sair</button>
-        </div>
-    </header>
-
-    <nav class="tabs">
-        <button class="tab active" data-tab="camisas">Camisas</button>
-        <button class="tab" data-tab="tipos">Tipos</button>
-        <button class="tab" data-tab="clientes">Clientes</button>
-        <button class="tab" data-tab="funcionarios">Funcionários</button>
-        <button class="tab" data-tab="cargos">Cargos</button>
-        <button class="tab" data-tab="pedidos">Pedidos</button>
-        <button class="tab" data-tab="pessoas">Pessoas</button>
-        <button class="tab" data-tab="relatorios">Relatórios</button>
-    </nav>
-
-    <main>
-        <!-- LOGIN -->
-        <dialog id="form-login" class="modal">
-            <form method="dialog" data-form="login">
-                <h3>Login</h3>
-                <label>Email<input name="email" type="email" required /></label>
-                <label>Senha<input name="senha" type="password" required /></label>
-                <div class="actions">
-                    <button type="button" data-close>Cancelar</button>
-                    <button type="submit" class="btn-primary">Entrar</button>
-                </div>
+            <form data-form="login" class="login-form">
+                <label>
+                    <span>E-mail</span>
+                    <input name="email" type="email" placeholder="seu-email@futtips.com" required />
+                </label>
+                <label>
+                    <span>Senha</span>
+                    <input name="senha" type="password" placeholder="Sua senha" required />
+                </label>
+                <button type="submit" class="btn-primary btn-login">Entrar no Painel</button>
+                <p class="auth-toggle">Não tem uma conta? <a href="#" id="go-to-register">Cadastre-se</a></p>
             </form>
-        </dialog>
+        </div>
 
-        <!-- CAMISAS -->
+        <!-- Card de Cadastro -->
+        <div id="register-card" class="login-card animate-fade-in" style="display: none; max-width: 540px;">
+            <div class="login-header">
+                <span class="login-logo">⚽</span>
+                <h2>Criar Conta</h2>
+                <p>Cadastre-se como cliente Futtips</p>
+            </div>
+            <form data-form="register" class="login-form">
+                <div class="form-row">
+                    <label>
+                        <span>Nome Completo</span>
+                        <input name="nome" required maxlength="50" placeholder="Seu nome" />
+                    </label>
+                </div>
+                <div class="form-grid">
+                    <label>
+                        <span>CPF</span>
+                        <input name="cpf" required placeholder="000.000.000-00" />
+                    </label>
+                    <label>
+                        <span>Telefone</span>
+                        <input name="telefone" required placeholder="(11) 99999-9999" />
+                    </label>
+                </div>
+                <div class="form-grid">
+                    <label>
+                        <span>E-mail</span>
+                        <input name="email" type="email" required placeholder="seu@email.com" />
+                    </label>
+                    <label>
+                        <span>Nascimento</span>
+                        <input name="nascimento" type="date" required />
+                    </label>
+                </div>
+                <div class="form-row">
+                    <label>
+                        <span>Senha (mín. 6 caracteres)</span>
+                        <input name="senha" type="password" required minlength="6" placeholder="Defina sua senha" />
+                    </label>
+                </div>
+                <h4 class="form-section-title">Endereço</h4>
+                <div class="form-grid-3">
+                    <label style="grid-column: span 2;">
+                        <span>Rua</span>
+                        <input name="rua" required placeholder="Nome da rua" />
+                    </label>
+                    <label>
+                        <span>Número</span>
+                        <input name="numero" required placeholder="Nº" />
+                    </label>
+                </div>
+                <div class="form-grid">
+                    <label>
+                        <span>Bairro</span>
+                        <input name="bairro" required placeholder="Seu bairro" />
+                    </label>
+                    <label>
+                        <span>CEP</span>
+                        <input name="cep" required placeholder="00000-000" />
+                    </label>
+                </div>
+                <div class="form-grid-3">
+                    <label style="grid-column: span 2;">
+                        <span>Cidade</span>
+                        <input name="cidade" required placeholder="Sua cidade" />
+                    </label>
+                    <label>
+                        <span>UF (Estado)</span>
+                        <input name="estado" required maxlength="2" placeholder="SP" />
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary btn-login">Criar Minha Conta</button>
+                <p class="auth-toggle">Já tem uma conta? <a href="#" id="go-to-login">Faça Login</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Container Principal do Aplicativo -->
+    <div id="app-container" style="display: none;">
+        <header class="topbar">
+            <div class="brand">
+                <span class="logo">⚽</span>
+                <div>
+                    <h1>Futtips</h1>
+                    <p>Painel de gerenciamento da loja</p>
+                </div>
+            </div>
+            <div class="api-config">
+                <label for="apiUrl">API</label>
+                <input id="apiUrl" type="text" />
+                <span id="apiStatus" class="status">·</span>
+                <span id="auth-info" class="status">·</span>
+                <button class="btn-ghost" id="btn-logout">Sair</button>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab active" data-tab="camisas">Camisas</button>
+            <button class="tab" data-tab="tipos">Tipos</button>
+            <button class="tab" data-tab="clientes">Clientes</button>
+            <button class="tab" data-tab="funcionarios">Funcionários</button>
+            <button class="tab" data-tab="cargos">Cargos</button>
+            <button class="tab" data-tab="pedidos">Pedidos</button>
+            <button class="tab" data-tab="pessoas">Pessoas</button>
+            <button class="tab" data-tab="relatorios">Relatórios</button>
+        </nav>
+
+        <main>
+            <!-- CAMISAS -->
         <section id="tab-camisas" class="panel active">
             <div class="panel-head">
                 <h2>Camisas</h2>
@@ -235,6 +326,7 @@
             <div id="list-relatorios" class="cards"></div>
         </section>
     </main>
+    </div>
 
     <div id="toast" class="toast"></div>
     <script src="app.js"></script>

@@ -1,6 +1,12 @@
 const DEFAULT_API = "http://localhost:8081";
 let API = localStorage.getItem("futtips_api") || DEFAULT_API;
 let TOKEN = localStorage.getItem("futtips_token") || "";
+let SESSION = null;
+try {
+    SESSION = JSON.parse(localStorage.getItem("futtips_session") || "null");
+} catch {
+    SESSION = null;
+}
 
 const apiInput = document.getElementById("apiUrl");
 const apiStatus = document.getElementById("apiStatus");
@@ -21,7 +27,22 @@ async function api(path, opts = {}) {
     let body = null;
     try { body = text ? JSON.parse(text) : null; } catch { body = text; }
     if (!res.ok) {
-        const msg = (body && (body.message || body.error)) || `${res.status} ${res.statusText}`;
+        let msg = `${res.status} ${res.statusText}`;
+        if (body && typeof body === "object") {
+            if (body.mensagem) {
+                msg = body.mensagem;
+                if (body.erros && typeof body.erros === "object") {
+                    const detail = Object.entries(body.erros)
+                        .map(([k, v]) => `${k}: ${v}`)
+                        .join(", ");
+                    if (detail) msg += ` (${detail})`;
+                }
+            } else if (body.message) {
+                msg = body.message;
+            } else if (body.error) {
+                msg = body.error;
+            }
+        }
         throw new Error(msg);
     }
     // Desembrulha ApiResponse { status, message, data }
@@ -49,6 +70,30 @@ async function pingApi() {
     } catch {
         apiStatus.textContent = "offline";
         apiStatus.className = "status err";
+    }
+}
+
+function updateAuthUI() {
+    const loginContainer = document.getElementById("login-container");
+    const appContainer = document.getElementById("app-container");
+    const authInfo = document.getElementById("auth-info");
+
+    if (SESSION) {
+        loginContainer.style.display = "none";
+        appContainer.style.display = "block";
+        if (authInfo) {
+            authInfo.textContent = `Olá, ${SESSION.nome} (${SESSION.perfil})`;
+            authInfo.className = "status ok";
+        }
+    } else {
+        loginContainer.style.display = "flex";
+        appContainer.style.display = "none";
+        document.getElementById("login-card").style.display = "block";
+        document.getElementById("register-card").style.display = "none";
+        if (authInfo) {
+            authInfo.textContent = "Não autenticado";
+            authInfo.className = "status err";
+        }
     }
 }
 
@@ -133,8 +178,10 @@ document.querySelectorAll("[data-form]").forEach((form) => {
             await handlers[form.dataset.form](data, form);
             const dlg = form.closest("dialog");
             if (dlg) dlg.close();
-            toast("Salvo com sucesso");
-            loadActiveTab();
+            if (!["login", "register"].includes(form.dataset.form)) {
+                toast("Salvo com sucesso");
+                loadActiveTab();
+            }
         } catch (err) { toast("Erro: " + err.message, "err"); }
     });
 });
@@ -142,9 +189,32 @@ document.querySelectorAll("[data-form]").forEach((form) => {
 const handlers = {
     async login(d) {
         const data = await post("/auth/login", { email: d.email, senha: d.senha });
-        TOKEN = data?.token || data?.accessToken || "";
-        if (TOKEN) localStorage.setItem("futtips_token", TOKEN);
-        document.getElementById("auth-info").textContent = TOKEN ? `Autenticado` : `Login OK`;
+        SESSION = data;
+        localStorage.setItem("futtips_session", JSON.stringify(SESSION));
+        TOKEN = "mock-token-" + SESSION.idPessoa;
+        localStorage.setItem("futtips_token", TOKEN);
+        updateAuthUI();
+        loadActiveTab();
+        toast(`Bem-vindo(a), ${SESSION.nome}!`);
+    },
+    async register(d) {
+        await post("/clientes", {
+            nome: d.nome,
+            cpf: d.cpf,
+            email: d.email,
+            senha: d.senha,
+            telefone: d.telefone,
+            nascimento: d.nascimento,
+            rua: d.rua,
+            numero: d.numero,
+            bairro: d.bairro,
+            cidade: d.cidade,
+            estado: d.estado,
+            cep: d.cep
+        });
+        toast("Conta criada com sucesso! Faça login.", "ok");
+        document.getElementById("register-card").style.display = "none";
+        document.getElementById("login-card").style.display = "block";
     },
     async camisa(d) {
         const body = {
@@ -383,12 +453,30 @@ window.removeItem = async (path) => {
 
 // Logout
 document.getElementById("btn-logout")?.addEventListener("click", () => {
-    TOKEN = ""; localStorage.removeItem("futtips_token");
-    document.getElementById("auth-info").textContent = "Não autenticado";
+    SESSION = null;
+    TOKEN = "";
+    localStorage.removeItem("futtips_session");
+    localStorage.removeItem("futtips_token");
+    updateAuthUI();
     toast("Sessão encerrada");
 });
-document.getElementById("auth-info").textContent = TOKEN ? "Autenticado" : "Não autenticado";
+
+// Alternância de Cards na tela de Autenticação
+document.getElementById("go-to-register")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("login-card").style.display = "none";
+    document.getElementById("register-card").style.display = "block";
+});
+
+document.getElementById("go-to-login")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("register-card").style.display = "none";
+    document.getElementById("login-card").style.display = "block";
+});
 
 // ---------- Init ----------
 pingApi();
-loadCamisas();
+updateAuthUI();
+if (SESSION) {
+    loadActiveTab();
+}
