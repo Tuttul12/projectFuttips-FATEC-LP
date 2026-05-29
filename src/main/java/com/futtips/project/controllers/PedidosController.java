@@ -48,6 +48,11 @@ public class PedidosController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.sucesso("Pedido cadastrado com sucesso.", pedidosService.criar(dto)));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<PedidosEntity>> editar(@PathVariable Integer id, @Valid @RequestBody CriarPedidoDTO dto) {
+        return ResponseEntity.ok(ApiResponse.sucesso("Pedido atualizado com sucesso.", pedidosService.editar(id, dto)));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> excluir(@PathVariable Integer id) {
         pedidosService.excluir(id);

@@ -142,6 +142,10 @@ document.querySelectorAll("[data-open]").forEach((b) =>
         const title = dlg.querySelector("h3");
         if (title) {
             if (b.dataset.open === "form-camisa") title.textContent = "Nova camisa";
+            if (b.dataset.open === "form-tipo") title.textContent = "Novo tipo";
+            if (b.dataset.open === "form-cliente") title.textContent = "Novo cliente";
+            if (b.dataset.open === "form-funcionario") title.textContent = "Novo funcionário";
+            if (b.dataset.open === "form-pedido") title.textContent = "Novo pedido";
         }
 
         await prepareForm(b.dataset.open);
@@ -254,18 +258,40 @@ const handlers = {
         return post("/tipo-camisas", body);
     },
     async cliente(d) {
-        return post("/clientes", {
+        const body = {
             nome: d.nome, cpf: d.cpf, email: d.email, senha: d.senha,
             telefone: d.telefone, nascimento: d.nascimento,
             rua: d.rua, numero: d.numero, bairro: d.bairro,
             cidade: d.cidade, estado: d.estado, cep: d.cep,
-        });
+        };
+        if (d.idCliente) {
+            await put(`/clientes/${d.idCliente}`, body);
+            try {
+                const enderecos = await get(`/enderecos/pessoa/${d.idCliente}`);
+                if (enderecos && enderecos.length > 0) {
+                    const end = enderecos[0];
+                    await put(`/enderecos/${end.id.idEndereco}/pessoa/${d.idCliente}`, {
+                        id: { idEndereco: end.id.idEndereco, pessoaId: Number(d.idCliente) },
+                        rua: d.rua,
+                        numero: Number(d.numero),
+                        bairro: d.bairro,
+                        cidade: d.cidade,
+                        estado: d.estado,
+                        cep: d.cep
+                    });
+                }
+            } catch (err) { console.error("Erro ao atualizar endereço:", err); }
+            return;
+        }
+        return post("/clientes", body);
     },
     async funcionario(d) {
-        return post("/funcionarios", {
+        const body = {
             nome: d.nome, cpf: d.cpf, email: d.email, senha: d.senha,
-            salario: Number(d.salario), codigoCargo: Number(d.codigoCargo),
-        });
+            salario: Number(d.salario), cargo: { codigo: Number(d.codigoCargo) },
+        };
+        if (d.idFuncionario) return put(`/funcionarios/${d.idFuncionario}`, body);
+        return post("/funcionarios", body);
     },
     async cargo(d) {
         const body = { permissao: d.permissao };
@@ -283,7 +309,9 @@ const handlers = {
         });
         if (!itens.length) throw new Error("Adicione ao menos 1 item");
         const valorInformado = d.valor ? Number(d.valor) : valor;
-        return post("/pedidos", { idCliente: Number(d.idCliente), valor: valorInformado, itens });
+        const body = { idCliente: Number(d.idCliente), valor: valorInformado, itens };
+        if (d.codigo) return put(`/pedidos/${d.codigo}`, body);
+        return post("/pedidos", body);
     },
 };
 
@@ -363,11 +391,29 @@ async function loadTipos() {
         <h3>${escape(t.modelo)}</h3>
         <div class="meta"><div>Fabricante: ${escape(t.fabricante)}</div></div>
         <div class="row-actions">
+          <button class="btn-edit" onclick="editTipo(${t.idTipo})">Editar</button>
           <button class="btn-delete" onclick="removeItem('/tipo-camisas/${t.idTipo}')">Excluir</button>
         </div>
       </div>`);
     } catch (e) { toast(e.message, "err"); }
 }
+
+window.editTipo = async (id) => {
+    try {
+        const t = await get(`/tipo-camisas/${id}`);
+        const dlg = document.getElementById("form-tipo");
+        const form = dlg.querySelector("form");
+        form.reset();
+        const title = dlg.querySelector("h3");
+        if (title) title.textContent = "Editar tipo de camisa";
+        
+        form.idTipo.value = t.idTipo;
+        form.modelo.value = t.modelo;
+        form.fabricante.value = t.fabricante;
+        
+        dlg.showModal();
+    } catch (e) { toast("Erro ao carregar dados: " + e.message, "err"); }
+};
 
 async function loadClientes() {
     try {
@@ -385,6 +431,7 @@ async function loadClientes() {
         </div>
         <div class="row-actions">
           <button class="btn-ghost" onclick="verTotalGasto(${id})">Total gasto</button>
+          <button class="btn-edit" onclick="editCliente(${id})">Editar</button>
           <button class="btn-delete" onclick="removeItem('/clientes/${id}')">Excluir</button>
         </div>
       </div>`;
@@ -394,6 +441,45 @@ async function loadClientes() {
 window.verTotalGasto = async (id) => {
     try { const v = await get(`/clientes/${id}/total-gasto`); toast(`Total gasto: R$ ${Number(v ?? 0).toFixed(2)}`); }
     catch (e) { toast("Erro: " + e.message, "err"); }
+};
+
+window.editCliente = async (id) => {
+    try {
+        const c = await get(`/clientes/${id}`);
+        const dlg = document.getElementById("form-cliente");
+        const form = dlg.querySelector("form");
+        form.reset();
+        await prepareForm("form-cliente");
+        const title = dlg.querySelector("h3");
+        if (title) title.textContent = "Editar cliente";
+        
+        const p = c.pessoasEntity || c;
+        form.idCliente.value = id;
+        form.nome.value = p.nome ?? c.nome ?? "";
+        form.cpf.value = p.cpf ?? c.cpf ?? "";
+        form.telefone.value = c.telefone ?? "";
+        form.email.value = p.email ?? c.email ?? "";
+        form.senha.value = p.senha ?? c.senha ?? "";
+        if (c.nascimento) {
+            const dt = new Date(c.nascimento);
+            form.nascimento.value = dt.toISOString().split("T")[0];
+        }
+        
+        try {
+            const enderecos = await get(`/enderecos/pessoa/${id}`);
+            if (enderecos && enderecos.length > 0) {
+                const end = enderecos[0];
+                form.rua.value = end.rua ?? "";
+                form.numero.value = end.numero ?? "";
+                form.bairro.value = end.bairro ?? "";
+                form.cep.value = end.cep ?? "";
+                form.cidade.value = end.cidade ?? "";
+                form.estado.value = end.estado ?? "";
+            }
+        } catch (err) { console.error("Sem endereço:", err); }
+        
+        dlg.showModal();
+    } catch (e) { toast("Erro ao carregar dados: " + e.message, "err"); }
 };
 
 async function loadFuncionarios() {
@@ -412,12 +498,36 @@ async function loadFuncionarios() {
           <div>Cargo: ${escape(f.cargoEntity?.permissao ?? f.cargo?.permissao ?? "-")}</div>
         </div>
         <div class="row-actions">
+          <button class="btn-edit" onclick="editFuncionario(${id})">Editar</button>
           <button class="btn-delete" onclick="removeItem('/funcionarios/${id}')">Excluir</button>
         </div>
       </div>`;
         });
     } catch (e) { toast(e.message, "err"); }
 }
+
+window.editFuncionario = async (id) => {
+    try {
+        const f = await get(`/funcionarios/${id}`);
+        const dlg = document.getElementById("form-funcionario");
+        const form = dlg.querySelector("form");
+        form.reset();
+        await prepareForm("form-funcionario");
+        const title = dlg.querySelector("h3");
+        if (title) title.textContent = "Editar funcionário";
+        
+        const p = f.pessoasEntity || f;
+        form.idFuncionario.value = id;
+        form.nome.value = p.nome ?? f.nome ?? "";
+        form.cpf.value = p.cpf ?? f.cpf ?? "";
+        form.email.value = p.email ?? f.email ?? "";
+        form.senha.value = p.senha ?? f.senha ?? "";
+        form.salario.value = f.salario ?? "";
+        form.codigoCargo.value = f.cargoEntity?.codigo ?? f.cargo?.codigo ?? "";
+        
+        dlg.showModal();
+    } catch (e) { toast("Erro ao carregar dados: " + e.message, "err"); }
+};
 
 async function loadCargos() {
     try {
@@ -446,11 +556,60 @@ async function loadPedidos() {
           <div>Data: ${p.dataPedido ? new Date(p.dataPedido).toLocaleDateString("pt-BR") : "-"}</div>
         </div>
         <div class="row-actions">
+          <button class="btn-edit" onclick="editPedido(${p.codigo})">Editar</button>
           <button class="btn-delete" onclick="removeItem('/pedidos/${p.codigo}')">Excluir</button>
         </div>
       </div>`);
     } catch (e) { toast(e.message, "err"); }
 }
+
+window.editPedido = async (id) => {
+    try {
+        const [p, items] = await Promise.all([
+            get(`/pedidos/${id}`),
+            get(`/itens-pedidos/pedido/${id}`)
+        ]);
+        
+        const dlg = document.getElementById("form-pedido");
+        const form = dlg.querySelector("form");
+        form.reset();
+        await prepareForm("form-pedido");
+        
+        const title = dlg.querySelector("h3");
+        if (title) title.textContent = `Editar pedido #${id}`;
+        
+        form.codigo.value = id;
+        form.idCliente.value = p.clientesEntity?.id ?? p.clientesEntity?.idPessoa ?? "";
+        form.valor.value = p.valor ?? "";
+        
+        const cont = document.getElementById("itens-pedido");
+        cont.innerHTML = "";
+        
+        if (items && items.length > 0) {
+            items.forEach((item) => {
+                const row = document.createElement("div");
+                row.className = "item-row";
+                row.innerHTML = `
+                <label>Camisa
+                  <select name="idCamisa" required>
+                    <option value="">— selecione —</option>
+                    ${window.__camisasCache.map((c) => `<option value="${c.idCamisa}">${escape(c.descricao)} (${escape(c.tamanho)})</option>`).join("")}
+                  </select>
+                </label>
+                <label>Qtd<input name="qtd" type="number" min="1" required /></label>
+                <button type="button" class="btn-x" title="Remover">×</button>`;
+                row.querySelector(".btn-x").addEventListener("click", () => row.remove());
+                row.querySelector('[name="idCamisa"]').value = item.camisa?.idCamisa ?? "";
+                row.querySelector('[name="qtd"]').value = item.qtd ?? 1;
+                cont.appendChild(row);
+            });
+        } else {
+            addItemRow();
+        }
+        
+        dlg.showModal();
+    } catch (e) { toast("Erro ao carregar dados: " + e.message, "err"); }
+};
 
 async function loadPessoas() {
     try {

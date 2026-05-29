@@ -91,6 +91,60 @@ public class PedidosService {
         pedidosRepository.deleteById(id);
     }
 
+    @Transactional
+    public PedidosEntity editar(Integer id, CriarPedidoDTO dto) {
+        validarDtoPedido(dto);
+
+        PedidosEntity existente = pedidosRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Pedido não encontrado!"));
+
+        ClientesEntity cliente = clientesRepository.findById(dto.getIdCliente())
+            .orElseThrow(() -> new RuntimeException("Cliente não encontrado!"));
+
+        if (cliente.getAtivo() != null && !cliente.getAtivo()) {
+            throw new RuntimeException("Não é possível associar pedido a cliente desativado!");
+        }
+
+        // Devolver estoque antigo e remover itens antigos
+        if (existente.getItensPedidosEntity() != null) {
+            for (ItensPedidosEntity itemAntigo : existente.getItensPedidosEntity()) {
+                CamisasEntity camisa = itemAntigo.getCamisa();
+                if (camisa != null) {
+                    camisa.setQuantidade(camisa.getQuantidade() + itemAntigo.getQtd());
+                    camisasRepository.save(camisa);
+                }
+                itensPedidosRepository.delete(itemAntigo);
+            }
+            existente.getItensPedidosEntity().clear();
+        }
+
+        // Validar e agrupar novas quantidades
+        Map<Integer, Integer> quantidadesSolicitadas = agruparQuantidades(dto.getItens());
+        Map<Integer, CamisasEntity> camisas = buscarEValidarEstoque(quantidadesSolicitadas);
+
+        // Atualizar dados gerais do pedido
+        existente.setClientesEntity(cliente);
+        existente.setValor(dto.getValor());
+        PedidosEntity pedidoAtualizado = pedidosRepository.save(existente);
+
+        // Salvar novos itens e deduzir novo estoque
+        for (Map.Entry<Integer, Integer> entrada : quantidadesSolicitadas.entrySet()) {
+            CamisasEntity camisa = camisas.get(entrada.getKey());
+            Integer quantidadeVendida = entrada.getValue();
+
+            ItensPedidosEntity item = new ItensPedidosEntity();
+            item.setPedido(pedidoAtualizado);
+            item.setCamisa(camisa);
+            item.setQtd(quantidadeVendida);
+            itensPedidosRepository.save(item);
+
+            camisa.setQuantidade(camisa.getQuantidade() - quantidadeVendida);
+            camisasRepository.save(camisa);
+        }
+
+        return pedidoAtualizado;
+    }
+
     private void validarDtoPedido(CriarPedidoDTO dto) {
         if (dto == null) {
             throw new RuntimeException("Dados do pedido não informados!");

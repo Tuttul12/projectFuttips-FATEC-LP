@@ -210,6 +210,7 @@
             <dialog id="form-cliente" class="modal">
                 <form method="dialog" data-form="cliente">
                     <h3>Novo cliente</h3>
+                    <input type="hidden" name="idCliente" />
                     <label>Nome<input name="nome" required maxlength="50" /></label>
                     <div class="row">
                         <label>CPF<input name="cpf" required placeholder="000.000.000-00" /></label>
@@ -251,6 +252,7 @@
             <dialog id="form-funcionario" class="modal">
                 <form method="dialog" data-form="funcionario">
                     <h3>Novo funcionário</h3>
+                    <input type="hidden" name="idFuncionario" />
                     <label>Nome<input name="nome" required /></label>
                     <div class="row">
                         <label>CPF<input name="cpf" required /></label>
@@ -297,6 +299,7 @@
             <dialog id="form-pedido" class="modal">
                 <form method="dialog" data-form="pedido">
                     <h3>Novo pedido</h3>
+                    <input type="hidden" name="codigo" />
                     <label>Cliente<select name="idCliente" required></select></label>
                     <label>Valor total (opcional — se vazio usa R$ 50/un)<input name="valor" type="number" step="0.01"
                             min="0.01" /></label>

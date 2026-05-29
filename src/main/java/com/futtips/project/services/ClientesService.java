@@ -63,6 +63,12 @@ public class ClientesService {
             ClientesEntity clientesParaAtualizar = clientes.get();
             clientesParaAtualizar.setNascimento(clientesEntity.getNascimento());
             clientesParaAtualizar.setTelefone(clientesEntity.getTelefone());
+            clientesParaAtualizar.setNome(clientesEntity.getNome());
+            clientesParaAtualizar.setCpf(clientesEntity.getCpf());
+            clientesParaAtualizar.setEmail(clientesEntity.getEmail());
+            if (clientesEntity.getSenha() != null && !clientesEntity.getSenha().isBlank()) {
+                clientesParaAtualizar.setSenha(clientesEntity.getSenha());
+            }
             return clientesRepository.save(clientesParaAtualizar);
         } else {
             return null;

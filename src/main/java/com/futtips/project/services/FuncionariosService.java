@@ -60,15 +60,20 @@ public class FuncionariosService {
 
     public FuncionariosEntity editar(int id, FuncionariosEntity funcionariosEntity) {
         Optional<FuncionariosEntity> funcionarios = funcionariosRepository.findById(id);
-        if(funcionarios.isPresent()){
+        if (funcionarios.isPresent()) {
             FuncionariosEntity funcionariosParaAtualizar = funcionarios.get();
             funcionariosParaAtualizar.setSalario(funcionariosEntity.getSalario());
             funcionariosParaAtualizar.setCargo(funcionariosEntity.getCargo());
+            funcionariosParaAtualizar.setNome(funcionariosEntity.getNome());
+            funcionariosParaAtualizar.setCpf(funcionariosEntity.getCpf());
+            funcionariosParaAtualizar.setEmail(funcionariosEntity.getEmail());
+            if (funcionariosEntity.getSenha() != null && !funcionariosEntity.getSenha().isBlank()) {
+                funcionariosParaAtualizar.setSenha(funcionariosEntity.getSenha());
+            }
             return funcionariosRepository.save(funcionariosParaAtualizar);
-        } else{
+        } else {
             return null;
         }      
-    
     }
 
     public FuncionariosEntity exluir(Integer id) {
