@@ -47,6 +47,8 @@ public class CamisasService {
         existente.setTamanho(camisa.getTamanho());
         validarQuantidade(camisa.getQuantidade());
         existente.setQuantidade(camisa.getQuantidade());
+        existente.setTipoCamisasEntity(camisa.getTipoCamisasEntity());
+        existente.setFuncionariosEntity(camisa.getFuncionariosEntity());
         return camisasRepository.save(existente);
     }
 

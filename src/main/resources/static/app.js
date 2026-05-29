@@ -33,6 +33,7 @@ async function api(path, opts = {}) {
                 msg = body.mensagem;
                 if (body.erros && typeof body.erros === "object") {
                     const detail = Object.entries(body.erros)
+                        .filter(([k, v]) => v !== body.mensagem)
                         .map(([k, v]) => `${k}: ${v}`)
                         .join(", ");
                     if (detail) msg += ` (${detail})`;
@@ -136,6 +137,13 @@ document.querySelectorAll("[data-open]").forEach((b) =>
         const form = dlg.querySelector("form");
         form.reset();
         form.querySelectorAll('input[type="hidden"]').forEach((i) => (i.value = ""));
+        
+        // Reseta o título do diálogo caso estivesse no modo edição
+        const title = dlg.querySelector("h3");
+        if (title) {
+            if (b.dataset.open === "form-camisa") title.textContent = "Nova camisa";
+        }
+
         await prepareForm(b.dataset.open);
         dlg.showModal();
     })
@@ -178,11 +186,24 @@ document.querySelectorAll("[data-form]").forEach((form) => {
             await handlers[form.dataset.form](data, form);
             const dlg = form.closest("dialog");
             if (dlg) dlg.close();
-            if (!["login", "register"].includes(form.dataset.form)) {
+            
+            if (form.dataset.form === "login") {
+                toast(`Bem-vindo(a), ${SESSION.nome}! Login realizado com sucesso.`, "ok");
+            } else if (form.dataset.form === "register") {
+                toast("Conta criada com sucesso! Agora você pode fazer o login.", "ok");
+            } else {
                 toast("Salvo com sucesso");
                 loadActiveTab();
             }
-        } catch (err) { toast("Erro: " + err.message, "err"); }
+        } catch (err) {
+            let friendlyError = err.message;
+            if (form.dataset.form === "login") {
+                friendlyError = "Falha no login: " + err.message;
+            } else if (form.dataset.form === "register") {
+                friendlyError = "Erro no cadastro: " + err.message;
+            }
+            toast(friendlyError, "err");
+        }
     });
 });
 
@@ -305,11 +326,34 @@ async function loadCamisas() {
           <div>Tipo: ${escape(c.tipoCamisasEntity?.modelo ?? "-")}</div>
         </div>
         <div class="row-actions">
+          <button class="btn-edit" onclick="editCamisa(${c.idCamisa})">Editar</button>
           <button class="btn-delete" onclick="removeItem('/camisas/${c.idCamisa}')">Excluir</button>
         </div>
       </div>`);
     } catch (e) { toast(e.message, "err"); }
 }
+
+window.editCamisa = async (id) => {
+    try {
+        const c = await get(`/camisas/${id}`);
+        const dlg = document.getElementById("form-camisa");
+        const form = dlg.querySelector("form");
+        form.reset();
+        await prepareForm("form-camisa");
+        
+        const title = dlg.querySelector("h3");
+        if (title) title.textContent = "Editar camisa";
+        
+        form.idCamisa.value = c.idCamisa;
+        form.descricao.value = c.descricao;
+        form.tamanho.value = c.tamanho;
+        form.quantidade.value = c.quantidade ?? 0;
+        form.tipoCamisaId.value = c.tipoCamisasEntity?.idTipo ?? "";
+        form.funcionarioId.value = c.funcionariosEntity?.id ?? c.funcionariosEntity?.idPessoa ?? "";
+        
+        dlg.showModal();
+    } catch (e) { toast("Erro ao carregar dados: " + e.message, "err"); }
+};
 
 async function loadTipos() {
     try {
