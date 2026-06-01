@@ -28,7 +28,7 @@ O sistema permite:
 Banco utilizado:
 
 ``` sql
-futtips
+SQL SERVER
 ```
 
 Configuração do `application.properties`:
