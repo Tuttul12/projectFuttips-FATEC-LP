@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.futtips.project.entities.ClientesEntity;
 import com.futtips.project.entities.dto.CriarClienteDTO;
+import com.futtips.project.entities.dto.EditarClienteDTO;
 import com.futtips.project.entities.dto.FuncionarioParaClienteDTO;
 import com.futtips.project.responses.ApiResponse;
 import com.futtips.project.services.ClientesService;
@@ -47,12 +48,21 @@ public class ClientesController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<ClientesEntity>> editar(@PathVariable int id, @Valid @RequestBody ClientesEntity clientesEntity){
-        ClientesEntity atualizado = clientesService.editar(id, clientesEntity);
+    public ResponseEntity<ApiResponse<ClientesEntity>> editar(
+            @PathVariable int id,
+            @Valid @RequestBody EditarClienteDTO dto) {
+
+        ClientesEntity atualizado = clientesService.editar(id, dto);
+
         if (atualizado == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<ClientesEntity>erro("Cliente não encontrado.", null));
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.<ClientesEntity>erro("Cliente não encontrado.", null));
         }
-        return ResponseEntity.ok(ApiResponse.sucesso("Cliente atualizado com sucesso.", atualizado));
+
+        return ResponseEntity.ok(
+            ApiResponse.sucesso("Cliente atualizado com sucesso.", atualizado)
+        );
     }
 
     @DeleteMapping("/{id}")

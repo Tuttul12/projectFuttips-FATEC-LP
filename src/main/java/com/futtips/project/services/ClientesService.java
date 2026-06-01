@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.futtips.project.entities.ClientesEntity;
 import com.futtips.project.entities.dto.CriarClienteDTO;
+import com.futtips.project.entities.dto.EditarClienteDTO;
 import com.futtips.project.entities.dto.FuncionarioParaClienteDTO;
 import com.futtips.project.repositories.ClientesRepository;
 import jakarta.persistence.EntityManager;
@@ -57,22 +58,46 @@ public class ClientesService {
             .orElseThrow(() -> new RuntimeException("Erro ao buscar cliente após inserção"));
     }
 
-    public ClientesEntity editar(int id, ClientesEntity clientesEntity) {
-        Optional<ClientesEntity> clientes = clientesRepository.findById(id);
-        if (clientes.isPresent()) {
-            ClientesEntity clientesParaAtualizar = clientes.get();
-            clientesParaAtualizar.setNascimento(clientesEntity.getNascimento());
-            clientesParaAtualizar.setTelefone(clientesEntity.getTelefone());
-            clientesParaAtualizar.setNome(clientesEntity.getNome());
-            clientesParaAtualizar.setCpf(clientesEntity.getCpf());
-            clientesParaAtualizar.setEmail(clientesEntity.getEmail());
-            if (clientesEntity.getSenha() != null && !clientesEntity.getSenha().isBlank()) {
-                clientesParaAtualizar.setSenha(clientesEntity.getSenha());
-            }
-            return clientesRepository.save(clientesParaAtualizar);
-        } else {
+    @Transactional
+    public ClientesEntity editar(int id, EditarClienteDTO dto) {
+
+        if (!clientesRepository.existsById(id)) {
             return null;
         }
+
+        entityManager.createNativeQuery(
+            "EXEC sp_editar_cliente " +
+            "@id_cliente = :idCliente, " +
+            "@nome = :nome, " +
+            "@cpf = :cpf, " +
+            "@email = :email, " +
+            "@senha = :senha, " +
+            "@nascimento = :nascimento, " +
+            "@telefone = :telefone, " +
+            "@rua = :rua, " +
+            "@numero = :numero, " +
+            "@bairro = :bairro, " +
+            "@cidade = :cidade, " +
+            "@estado = :estado, " +
+            "@cep = :cep"
+        )
+        .setParameter("idCliente", id)
+        .setParameter("nome", dto.getNome())
+        .setParameter("cpf", dto.getCpf())
+        .setParameter("email", dto.getEmail())
+        .setParameter("senha", dto.getSenha())
+        .setParameter("nascimento", dto.getNascimento())
+        .setParameter("telefone", dto.getTelefone())
+        .setParameter("rua", dto.getRua())
+        .setParameter("numero", dto.getNumero())
+        .setParameter("bairro", dto.getBairro())
+        .setParameter("cidade", dto.getCidade())
+        .setParameter("estado", dto.getEstado())
+        .setParameter("cep", dto.getCep())
+        .executeUpdate();
+
+        return clientesRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Erro ao buscar cliente após edição"));
     }
 
     @Transactional
