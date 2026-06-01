@@ -124,4 +124,4 @@ Desenvolvido por
 **Luiz Evangelista**,
 **Vitor Emanuel**,
 **Heitor Gallina**,
-**Diego Marcato**,
+**Diego Marcato**.
