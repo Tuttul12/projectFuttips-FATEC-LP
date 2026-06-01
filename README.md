@@ -121,7 +121,7 @@ http://localhost:8081
 Projeto acadêmico --- FATEC Rio Preto
 
 Desenvolvido por
-**Luiz Evangelista**
-**Vitor Emanuel**
-**Heitor Gallina**
-**Diego Marcato**
+**Luiz Evangelista**,
+**Vitor Emanuel**,
+**Heitor Gallina**,
+**Diego Marcato**,
