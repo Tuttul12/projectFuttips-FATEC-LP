@@ -8,15 +8,7 @@ try {
     SESSION = null;
 }
 
-const apiInput = document.getElementById("apiUrl");
 const apiStatus = document.getElementById("apiStatus");
-apiInput.value = API;
-apiInput.addEventListener("change", () => {
-    API = apiInput.value.replace(/\/$/, "");
-    localStorage.setItem("futtips_api", API);
-    pingApi();
-    loadActiveTab();
-});
 
 // ---------- HTTP helpers ----------
 async function api(path, opts = {}) {
@@ -125,7 +117,7 @@ function loadActiveTab() {
     const map = {
         camisas: loadCamisas, tipos: loadTipos, clientes: loadClientes,
         funcionarios: loadFuncionarios, cargos: loadCargos, pedidos: loadPedidos,
-        pessoas: loadPessoas, relatorios: loadRelatorios,
+        "itens-pedidos": loadItensPedidos, relatorios: loadRelatorios,
     };
     map[activeTab()]?.();
 }
@@ -611,28 +603,30 @@ window.editPedido = async (id) => {
     } catch (e) { toast("Erro ao carregar dados: " + e.message, "err"); }
 };
 
-async function loadPessoas() {
+async function loadItensPedidos() {
     try {
-        const items = await get("/pessoas");
-        renderCards("list-pessoas", items, (p) => `
+        const items = await get("/itens-pedidos");
+        renderCards("list-itens-pedidos", items, (item) => {
+            const pedidoCodigo = item.pedido?.codigo ?? "-";
+            const clienteNome = item.pedido?.clientesEntity?.pessoasEntity?.nome ?? item.pedido?.clientesEntity?.nome ?? "-";
+            const camisaDesc = item.camisa?.descricao ?? "-";
+            const camisaTamanho = item.camisa?.tamanho ?? "-";
+            return `
       <div class="card">
-        <h3>${escape(p.nome)}</h3>
+        <h3>Item de Pedido #${item.id}</h3>
         <div class="meta">
-          <div>CPF: ${escape(p.cpf ?? "-")}</div>
-          <div>Email: ${escape(p.email ?? "-")}</div>
-          <div>Status: ${p.ativo === false ? "inativo" : "ativo"}</div>
+          <div>Pedido: <strong>#${pedidoCodigo}</strong></div>
+          <div>Cliente: ${escape(clienteNome)}</div>
+          <div>Camisa: ${escape(camisaDesc)} (${escape(camisaTamanho)})</div>
+          <div>Quantidade: ${item.qtd}</div>
         </div>
         <div class="row-actions">
-          <button class="btn-ghost" onclick="togglePessoa(${p.id}, ${p.ativo === false})">${p.ativo === false ? "Ativar" : "Desativar"}</button>
-          <button class="btn-delete" onclick="removeItem('/pessoas/${p.id}')">Excluir</button>
+          <button class="btn-delete" onclick="removeItem('/itens-pedidos/${item.id}')">Excluir</button>
         </div>
-      </div>`);
+      </div>`;
+        });
     } catch (e) { toast(e.message, "err"); }
 }
-window.togglePessoa = async (id, ativar) => {
-    try { await put(`/pessoas/${id}/${ativar ? "ativar" : "desativar"}`, {}); toast("Atualizado"); loadActiveTab(); }
-    catch (e) { toast("Erro: " + e.message, "err"); }
-};
 
 async function loadRelatorios() {
     try {
