@@ -1,7 +1,17 @@
 const DEFAULT_API = "http://localhost:8081";
 let API = localStorage.getItem("futtips_api") || DEFAULT_API;
+
 let TOKEN = localStorage.getItem("futtips_token") || "";
+
+// Remove tokens antigos do tipo mock-token
+if (TOKEN && TOKEN.startsWith("mock-token")) {
+    localStorage.removeItem("futtips_token");
+    localStorage.removeItem("futtips_session");
+    TOKEN = "";
+}
+
 let SESSION = null;
+
 try {
     SESSION = JSON.parse(localStorage.getItem("futtips_session") || "null");
 } catch {
@@ -12,33 +22,64 @@ const apiStatus = document.getElementById("apiStatus");
 
 // ---------- HTTP helpers ----------
 async function api(path, opts = {}) {
-    const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
-    if (TOKEN) headers.Authorization = `Bearer ${TOKEN}`;
-    const res = await fetch(`${API}${path}`, { ...opts, headers });
+
+    TOKEN = localStorage.getItem("futtips_token") || TOKEN;
+
+    const headers = {
+        "Content-Type": "application/json",
+        ...(opts.headers || {})
+    };
+
+    if (TOKEN) {
+        headers.Authorization = `Bearer ${TOKEN}`;
+    }
+
+    const res = await fetch(`${API}${path}`, {
+        ...opts,
+        headers
+    });
+
     const text = await res.text();
+
     let body = null;
-    try { body = text ? JSON.parse(text) : null; } catch { body = text; }
+
+    try {
+        body = text ? JSON.parse(text) : null;
+    } catch {
+        body = text;
+    }
+
+    if (res.status === 401) {
+
+        localStorage.removeItem("futtips_token");
+        localStorage.removeItem("futtips_session");
+
+        TOKEN = "";
+        SESSION = null;
+
+        updateAuthUI();
+
+        throw new Error("Sessão expirada. Faça login novamente.");
+    }
+
     if (!res.ok) {
+
         let msg = `${res.status} ${res.statusText}`;
+
         if (body && typeof body === "object") {
+
             if (body.mensagem) {
                 msg = body.mensagem;
-                if (body.erros && typeof body.erros === "object") {
-                    const detail = Object.entries(body.erros)
-                        .filter(([k, v]) => v !== body.mensagem)
-                        .map(([k, v]) => `${k}: ${v}`)
-                        .join(", ");
-                    if (detail) msg += ` (${detail})`;
-                }
             } else if (body.message) {
                 msg = body.message;
             } else if (body.error) {
                 msg = body.error;
             }
         }
+
         throw new Error(msg);
     }
-    // Desembrulha ApiResponse { status, message, data }
+
     if (
         body &&
         typeof body === "object" &&
@@ -57,10 +98,22 @@ const del = (p) => api(p, { method: "DELETE" });
 
 async function pingApi() {
     try {
-        const r = await fetch(`${API}/camisas`);
+
+        const headers = {};
+
+        if (TOKEN) {
+            headers.Authorization = `Bearer ${TOKEN}`;
+        }
+
+        const r = await fetch(`${API}/camisas`, {
+            headers
+        });
+
         apiStatus.textContent = r.ok ? "conectado" : "offline";
         apiStatus.className = `status ${r.ok ? "ok" : "err"}`;
+
     } catch {
+
         apiStatus.textContent = "offline";
         apiStatus.className = "status err";
     }
@@ -205,14 +258,27 @@ document.querySelectorAll("[data-form]").forEach((form) => {
 
 const handlers = {
     async login(d) {
-        const data = await post("/auth/login", { email: d.email, senha: d.senha });
+
+        const data = await post("/auth/login", {
+            email: d.email,
+            senha: d.senha
+        });
+
         SESSION = data;
-        localStorage.setItem("futtips_session", JSON.stringify(SESSION));
-        TOKEN = "mock-token-" + SESSION.idPessoa;
-        localStorage.setItem("futtips_token", TOKEN);
+        TOKEN = data.token;
+
+        localStorage.setItem(
+            "futtips_session",
+            JSON.stringify(SESSION)
+        );
+
+        localStorage.setItem(
+            "futtips_token",
+            TOKEN
+        );
+
         updateAuthUI();
         loadActiveTab();
-        toast(`Bem-vindo(a), ${SESSION.nome}!`);
     },
     async register(d) {
         await post("/clientes", {
