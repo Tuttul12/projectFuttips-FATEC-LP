@@ -802,7 +802,7 @@ CREATE TABLE log_pedidos (
     data_pedido DATE NOT NULL,
     registrado_em DATETIME NOT NULL DEFAULT GETDATE(),
     operacao VARCHAR(10) NOT NULL -- INSERT, UPDATE, DELETE
-);
+)
 GO
 
 CREATE TRIGGER trg_log_pedidos
@@ -810,7 +810,7 @@ ON pedidos
 AFTER INSERT, UPDATE, DELETE
 AS
 BEGIN
-    SET NOCOUNT ON;
+    SET NOCOUNT ON
 
     -- ========================================
     -- INSERT: novo pedido criado
@@ -839,7 +839,7 @@ BEGIN
         INNER JOIN clientes c
             ON i.id_cliente = c.id_clientes
         INNER JOIN pessoas p
-            ON c.id_clientes = p.id;
+            ON c.id_clientes = p.id
     END
 
     -- ========================================
@@ -869,7 +869,7 @@ BEGIN
         INNER JOIN clientes c
             ON i.id_cliente = c.id_clientes
         INNER JOIN pessoas p
-            ON c.id_clientes = p.id;
+            ON c.id_clientes = p.id
     END
 
     -- ========================================
@@ -899,9 +899,9 @@ BEGIN
         INNER JOIN clientes c
             ON d.id_cliente = c.id_clientes
         INNER JOIN pessoas p
-            ON c.id_clientes = p.id;
+            ON c.id_clientes = p.id
     END
-END;
+END
 GO
 
 
@@ -915,16 +915,16 @@ FORMAT,
 MEDIANAME = 'FuttipsBackup',
 NAME = 'Backup Completo - Futtips',
 DESCRIPTION = 'Backup completo do banco futtips',
-STATS = 10;
+STATS = 10
 GO
 -- ========================================
 -- BACKUP COM DATA NO NOME DO ARQUIVO
 -- (útil para backups automáticos diários)
 -- ========================================
-DECLARE @caminho VARCHAR(255);
+DECLARE @caminho VARCHAR(255)
 SET @caminho = 'C:\Backup\futtips_' +
 FORMAT(GETDATE(), 'yyyyMMdd_HHmmss') +
-'.bak';
+'.bak'
 BACKUP DATABASE futtips
 TO DISK = @caminho
 WITH
@@ -950,13 +950,13 @@ BACKUP LOG futtips
 TO DISK = 'C:\Backup\futtips_log.bak'
 WITH
 NAME = 'Backup Log - Futtips',
-STATS = 10;
+STATS = 10
 GO
 -- ========================================
 -- RESTORE EM OUTRO SERVIDOR
 34-- (muda o caminho dos arquivos)
 -- ========================================
-ALTER DATABASE futtips SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+ALTER DATABASE futtips SET SINGLE_USER WITH ROLLBACK IMMEDIATE
 GO
 RESTORE DATABASE futtips
 FROM DISK = 'C:\Backup\futtips_backup_completo.bak'
@@ -966,7 +966,7 @@ MOVE 'futtips'
 TO 'C:\SQLServer\Data\futtips.mdf',
 MOVE 'futtips_log' TO 'C:\SQLServer\Log\futtips_log.ldf',
 RECOVERY,
-STATS = 10;
+STATS = 10
 GO
-ALTER DATABASE futtips SET MULTI_USER;
+ALTER DATABASE futtips SET MULTI_USER
 GO
