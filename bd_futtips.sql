@@ -786,3 +786,187 @@ EXEC sp_editar_cliente
     @cidade = 'São José do Rio Preto',
     @estado = 'SP',
     @cep = '15000-000'
+
+
+--========================================
+--TRIGGERS
+--========================================
+--TABELA PARA LOGS
+CREATE TABLE log_pedidos (
+    id INT IDENTITY PRIMARY KEY NOT NULL,
+    id_pedido INT NOT NULL,
+    protocolo VARCHAR(30) NOT NULL,
+    valor MONEY NOT NULL,
+    id_cliente INT NOT NULL,
+    nome_cliente VARCHAR(50) NOT NULL,
+    data_pedido DATE NOT NULL,
+    registrado_em DATETIME NOT NULL DEFAULT GETDATE(),
+    operacao VARCHAR(10) NOT NULL -- INSERT, UPDATE, DELETE
+);
+GO
+
+CREATE TRIGGER trg_log_pedidos
+ON pedidos
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- ========================================
+    -- INSERT: novo pedido criado
+    -- ========================================
+    IF EXISTS (SELECT 1 FROM inserted)
+       AND NOT EXISTS (SELECT 1 FROM deleted)
+    BEGIN
+        INSERT INTO log_pedidos (
+            id_pedido,
+            protocolo,
+            valor,
+            id_cliente,
+            nome_cliente,
+            data_pedido,
+            operacao
+        )
+        SELECT
+            i.codigo,
+            i.protocolo,
+            i.valor,
+            i.id_cliente,
+            p.nome,
+            i.data_pedido,
+            'INSERT'
+        FROM inserted i
+        INNER JOIN clientes c
+            ON i.id_cliente = c.id_clientes
+        INNER JOIN pessoas p
+            ON c.id_clientes = p.id;
+    END
+
+    -- ========================================
+    -- UPDATE: pedido atualizado
+    -- ========================================
+    IF EXISTS (SELECT 1 FROM inserted)
+       AND EXISTS (SELECT 1 FROM deleted)
+    BEGIN
+        INSERT INTO log_pedidos (
+            id_pedido,
+            protocolo,
+            valor,
+            id_cliente,
+            nome_cliente,
+            data_pedido,
+            operacao
+        )
+        SELECT
+            i.codigo,
+            i.protocolo,
+            i.valor,
+            i.id_cliente,
+            p.nome,
+            i.data_pedido,
+            'UPDATE'
+        FROM inserted i
+        INNER JOIN clientes c
+            ON i.id_cliente = c.id_clientes
+        INNER JOIN pessoas p
+            ON c.id_clientes = p.id;
+    END
+
+    -- ========================================
+    -- DELETE: pedido removido
+    -- ========================================
+    IF NOT EXISTS (SELECT 1 FROM inserted)
+       AND EXISTS (SELECT 1 FROM deleted)
+    BEGIN
+        INSERT INTO log_pedidos (
+            id_pedido,
+            protocolo,
+            valor,
+            id_cliente,
+            nome_cliente,
+            data_pedido,
+            operacao
+        )
+        SELECT
+            d.codigo,
+            d.protocolo,
+            d.valor,
+            d.id_cliente,
+            p.nome,
+            d.data_pedido,
+            'DELETE'
+        FROM deleted d
+        INNER JOIN clientes c
+            ON d.id_cliente = c.id_clientes
+        INNER JOIN pessoas p
+            ON c.id_clientes = p.id;
+    END
+END;
+GO
+
+
+-- ========================================
+-- BACKUP COMPLETO
+-- ========================================
+BACKUP DATABASE futtips
+TO DISK = 'C:\Backup\futtips_backup_completo.bak'
+WITH
+FORMAT,
+MEDIANAME = 'FuttipsBackup',
+NAME = 'Backup Completo - Futtips',
+DESCRIPTION = 'Backup completo do banco futtips',
+STATS = 10;
+GO
+-- ========================================
+-- BACKUP COM DATA NO NOME DO ARQUIVO
+-- (útil para backups automáticos diários)
+-- ========================================
+DECLARE @caminho VARCHAR(255);
+SET @caminho = 'C:\Backup\futtips_' +
+FORMAT(GETDATE(), 'yyyyMMdd_HHmmss') +
+'.bak';
+BACKUP DATABASE futtips
+TO DISK = @caminho
+WITH
+FORMAT,
+NAME = 'Backup Diário - Futtips',
+STATS = 10;
+GO
+-- ========================================
+-- BACKUP DIFERENCIAL
+-- (só salva o que mudou desde o último backup completo)
+-- ========================================
+BACKUP DATABASE futtips
+TO DISK = 'C:\Backup\futtips_diferencial.bak'
+WITH
+DIFFERENTIAL,
+NAME = 'Backup Diferencial - Futtips',
+STATS = 10;
+GO
+-- ========================================
+-- BACKUP DO LOG DE TRANSAÇÕES
+-- ========================================
+BACKUP LOG futtips
+TO DISK = 'C:\Backup\futtips_log.bak'
+WITH
+NAME = 'Backup Log - Futtips',
+STATS = 10;
+GO
+-- ========================================
+-- RESTORE EM OUTRO SERVIDOR
+34-- (muda o caminho dos arquivos)
+-- ========================================
+ALTER DATABASE futtips SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+GO
+RESTORE DATABASE futtips
+FROM DISK = 'C:\Backup\futtips_backup_completo.bak'
+WITH
+REPLACE,
+MOVE 'futtips'
+TO 'C:\SQLServer\Data\futtips.mdf',
+MOVE 'futtips_log' TO 'C:\SQLServer\Log\futtips_log.ldf',
+RECOVERY,
+STATS = 10;
+GO
+ALTER DATABASE futtips SET MULTI_USER;
+GO
