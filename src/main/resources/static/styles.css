@@ -572,4 +572,89 @@ main {
     color: var(--primary-hover);
     text-decoration: underline;
 }
-
+
+/* Itens inline no card de pedido */
+.pedido-itens {
+    margin: 10px 0 6px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+}
+
+.pedido-itens strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pedido-itens em {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.itens-inline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.itens-inline li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    background: var(--surface-2);
+    border-radius: 6px;
+}
+
+.itens-inline li span:first-child {
+    flex: 1;
+    color: var(--text);
+}
+
+.item-tamanho {
+    background: var(--border);
+    color: var(--text-muted);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.item-qtd {
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.btn-x-small {
+    background: none;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    border-radius: 4px;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.btn-x-small:hover {
+    background: var(--danger);
+    color: #fff;
+}

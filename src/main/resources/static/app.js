@@ -18,8 +18,6 @@ try {
     SESSION = null;
 }
 
-const apiStatus = document.getElementById("apiStatus");
-
 // ---------- HTTP helpers ----------
 async function api(path, opts = {}) {
 
@@ -96,28 +94,6 @@ const post = (p, b) => api(p, { method: "POST", body: JSON.stringify(b) });
 const put = (p, b) => api(p, { method: "PUT", body: JSON.stringify(b) });
 const del = (p) => api(p, { method: "DELETE" });
 
-async function pingApi() {
-    try {
-
-        const headers = {};
-
-        if (TOKEN) {
-            headers.Authorization = `Bearer ${TOKEN}`;
-        }
-
-        const r = await fetch(`${API}/camisas`, {
-            headers
-        });
-
-        apiStatus.textContent = r.ok ? "conectado" : "offline";
-        apiStatus.className = `status ${r.ok ? "ok" : "err"}`;
-
-    } catch {
-
-        apiStatus.textContent = "offline";
-        apiStatus.className = "status err";
-    }
-}
 
 function updateAuthUI() {
     const loginContainer = document.getElementById("login-container");
@@ -170,7 +146,7 @@ function loadActiveTab() {
     const map = {
         camisas: loadCamisas, tipos: loadTipos, clientes: loadClientes,
         funcionarios: loadFuncionarios, cargos: loadCargos, pedidos: loadPedidos,
-        "itens-pedidos": loadItensPedidos, relatorios: loadRelatorios,
+        relatorios: loadRelatorios,
     };
     map[activeTab()]?.();
 }
@@ -604,7 +580,41 @@ async function loadCargos() {
 async function loadPedidos() {
     try {
         const items = await get("/pedidos");
-        renderCards("list-pedidos", items, (p) => `
+        const cont = document.getElementById("list-pedidos");
+        if (!items || items.length === 0) {
+            cont.innerHTML = `<div class="empty">Nada por aqui ainda.</div>`;
+            return;
+        }
+
+        // Busca os itens de cada pedido em paralelo
+        const pedidosComItens = await Promise.all(
+            items.map(async (p) => {
+                try {
+                    const itens = await get(`/itens-pedidos/pedido/${p.codigo}`);
+                    return { ...p, itens: itens || [] };
+                } catch {
+                    return { ...p, itens: [] };
+                }
+            })
+        );
+
+        cont.innerHTML = pedidosComItens.map((p) => {
+            const itensHtml = p.itens.length > 0
+                ? `<div class="pedido-itens">
+                    <strong>Itens do pedido:</strong>
+                    <ul class="itens-inline">
+                      ${p.itens.map((it) => `
+                        <li>
+                          <span>${escape(it.camisa?.descricao ?? "-")}</span>
+                          <span class="item-tamanho">${escape(it.camisa?.tamanho ?? "")}</span>
+                          <span class="item-qtd">Qtd: ${it.qtd}</span>
+                          <button class="btn-x-small" onclick="removeItem('/itens-pedidos/${it.id}').then(loadPedidos)" title="Remover item">×</button>
+                        </li>`).join("")}
+                    </ul>
+                  </div>`
+                : `<div class="pedido-itens"><em>Sem itens cadastrados.</em></div>`;
+
+            return `
       <div class="card">
         <h3>Pedido #${p.codigo}</h3>
         <div class="meta">
@@ -613,11 +623,13 @@ async function loadPedidos() {
           <div>Valor: R$ ${Number(p.valor ?? 0).toFixed(2)}</div>
           <div>Data: ${p.dataPedido ? new Date(p.dataPedido).toLocaleDateString("pt-BR") : "-"}</div>
         </div>
+        ${itensHtml}
         <div class="row-actions">
           <button class="btn-edit" onclick="editPedido(${p.codigo})">Editar</button>
           <button class="btn-delete" onclick="removeItem('/pedidos/${p.codigo}')">Excluir</button>
         </div>
-      </div>`);
+      </div>`;
+        }).join("");
     } catch (e) { toast(e.message, "err"); }
 }
 
@@ -738,7 +750,6 @@ document.getElementById("go-to-login")?.addEventListener("click", (e) => {
 });
 
 // ---------- Init ----------
-pingApi();
 updateAuthUI();
 if (SESSION) {
     loadActiveTab();
